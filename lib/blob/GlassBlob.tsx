@@ -16,10 +16,6 @@ interface BurstState {
   start: number;
 }
 
-interface FlashState {
-  start: number;
-}
-
 interface Props {
   config: BlobConfig;
 }
@@ -66,7 +62,6 @@ export function GlassBlob({ config }: Props) {
   // Click impulses
   const impulses = useRef<Impulse[]>([]);
   const burst = useRef<BurstState | null>(null);
-  const flash = useRef<FlashState | null>(null);
 
   // Mouse listener (window-relative normalized)
   useEffect(() => {
@@ -111,16 +106,12 @@ export function GlassBlob({ config }: Props) {
       const t = performance.now() / 1000;
       const fx = cfg.clickEffect;
 
-      const wantsRipple = fx === 'ripple' || fx === 'ripple+burst' || fx === 'ripple+flash' || fx === 'all';
-      const wantsBurst = fx === 'burst' || fx === 'ripple+burst' || fx === 'all';
-      const wantsFlash = fx === 'flash' || fx === 'ripple+flash' || fx === 'all';
-
-      if (wantsRipple) {
+      if (fx === 'ripple') {
         impulses.current.push({ x: local.x, y: local.y, z: local.z, start: t });
         if (impulses.current.length > cfg.rippleMaxActive) impulses.current.shift();
+      } else if (fx === 'burst') {
+        burst.current = { start: t };
       }
-      if (wantsBurst) burst.current = { start: t };
-      if (wantsFlash) flash.current = { start: t };
     };
     dom.addEventListener('pointerdown', onDown);
     return () => dom.removeEventListener('pointerdown', onDown);
@@ -141,23 +132,11 @@ export function GlassBlob({ config }: Props) {
       matRef.current.distortionScale = cfg.distortionScale;
       matRef.current.temporalDistortion = cfg.temporalDistortion;
       matRef.current.attenuationDistance = cfg.attenuationDistance;
-      // attenuation color + flash
-      const flashCol = new THREE.Color(cfg.flashColor);
       const baseCol = new THREE.Color(cfg.attenuationColor);
-      let useCol = baseCol;
-      if (flash.current) {
-        const elapsed = t - flash.current.start;
-        if (elapsed > cfg.flashDuration) {
-          flash.current = null;
-        } else {
-          const k = 1 - elapsed / cfg.flashDuration;
-          useCol = baseCol.clone().lerp(flashCol, k);
-        }
-      }
       if (matRef.current.attenuationColor) {
-        matRef.current.attenuationColor.copy(useCol);
+        matRef.current.attenuationColor.copy(baseCol);
       } else {
-        matRef.current.attenuationColor = useCol;
+        matRef.current.attenuationColor = baseCol;
       }
     }
 

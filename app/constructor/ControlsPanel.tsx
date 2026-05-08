@@ -272,60 +272,34 @@ export function ControlsPanel() {
         },
         clickEffect: {
           value: config.clickEffect,
-          options: ['none', 'ripple', 'burst', 'flash', 'ripple+burst', 'ripple+flash', 'all'] as ClickEffect[],
-          label: hintLabel('clickEffect', 'Which effect(s) fire on click: ripple, burst, flash, or combinations.'),
+          options: ['ripple', 'burst'] as ClickEffect[],
+          label: hintLabel('clickEffect', 'Which effect fires on click: ripple wave or outward burst.'),
           render: (get) => get('Click.clickEnabled'),
           onChange: (v: ClickEffect) => setNested('clickEffect', v),
         },
         ripplePropagationSpeed: {
           value: config.ripplePropagationSpeed, min: 0.05, max: 1, step: 0.01,
           label: hintLabel('ripplePropagationSpeed', 'How fast the ripple wave travels across the surface.'),
-          render: (get) => {
-            if (!get('Click.clickEnabled')) return false;
-            const e = get('Click.clickEffect') as string;
-            return e === 'all' || e.includes('ripple');
-          },
+          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'ripple',
           onChange: (v: number) => setNested('ripplePropagationSpeed', v),
         },
         rippleAmplitude: {
           value: config.rippleAmplitude, min: 0, max: 2, step: 0.05,
           label: hintLabel('rippleAmplitude', 'Height of the ripple wave at impact.'),
-          render: (get) => {
-            if (!get('Click.clickEnabled')) return false;
-            const e = get('Click.clickEffect') as string;
-            return e === 'all' || e.includes('ripple');
-          },
+          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'ripple',
           onChange: (v: number) => setNested('rippleAmplitude', v),
         },
         rippleDecay: {
           value: config.rippleDecay, min: 0.1, max: 5, step: 0.05,
           label: hintLabel('rippleDecay', 'How quickly the ripple fades. Higher = shorter, snappier ripple.'),
-          render: (get) => {
-            if (!get('Click.clickEnabled')) return false;
-            const e = get('Click.clickEffect') as string;
-            return e === 'all' || e.includes('ripple');
-          },
+          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'ripple',
           onChange: (v: number) => setNested('rippleDecay', v),
         },
         burstScale: {
           value: config.burstScale, min: 0, max: 1, step: 0.01,
           label: hintLabel('burstScale', 'Size of the outward push at the click point.'),
-          render: (get) => {
-            if (!get('Click.clickEnabled')) return false;
-            const e = get('Click.clickEffect') as string;
-            return e === 'all' || e.includes('burst');
-          },
+          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'burst',
           onChange: (v: number) => setNested('burstScale', v),
-        },
-        flashColor: {
-          value: config.flashColor,
-          label: hintLabel('flashColor', 'Color of the brief lighting flash on click.'),
-          render: (get) => {
-            if (!get('Click.clickEnabled')) return false;
-            const e = get('Click.clickEffect') as string;
-            return e === 'all' || e.includes('flash');
-          },
-          onChange: (v: string) => setNested('flashColor', v),
         },
       }),
       Environment: folder({

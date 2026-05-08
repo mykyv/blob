@@ -28,7 +28,11 @@ export function encodeConfig(config: BlobConfig): string {
 export function decodeConfig(encoded: string): BlobConfig {
   try {
     const diff = JSON.parse(fromBase64Url(encoded)) as Partial<BlobConfig>;
-    return { ...defaultConfig, ...diff };
+    const merged = { ...defaultConfig, ...diff };
+    if (merged.clickEffect !== 'ripple' && merged.clickEffect !== 'burst') {
+      merged.clickEffect = defaultConfig.clickEffect;
+    }
+    return merged;
   } catch {
     return defaultConfig;
   }

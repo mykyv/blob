@@ -1,4 +1,4 @@
-export type ClickEffect = 'ripple' | 'burst' | 'flash' | 'ripple+burst' | 'ripple+flash' | 'all' | 'none';
+export type ClickEffect = 'ripple' | 'burst';
 
 export type EnvPreset =
   | 'studio'
@@ -70,8 +70,6 @@ export interface BlobConfig {
   rippleLifetime: number;
   burstScale: number;
   burstDuration: number;
-  flashColor: string;
-  flashDuration: number;
 
   // Environment lighting
   envIntensity: number;
@@ -128,8 +126,6 @@ export const defaultConfig: BlobConfig = {
   rippleLifetime: 5,
   burstScale: 0.18,
   burstDuration: 0.5,
-  flashColor: '#ff6bd6',
-  flashDuration: 0.6,
 
   envIntensity: 1.0,
   envPreset: 'studio',
