@@ -2,26 +2,9 @@
 
 import { Canvas } from '@react-three/fiber';
 import { Environment } from '@react-three/drei';
-import { useMemo } from 'react';
-import type { BlobConfig, BackgroundConfig } from './types';
+import type { BlobConfig } from './types';
 import { GlassBlob } from './GlassBlob';
-
-function backgroundStyle(bg: BackgroundConfig): React.CSSProperties {
-  switch (bg.mode) {
-    case 'color':
-      return { background: bg.color };
-    case 'gradient':
-      return { background: `linear-gradient(${bg.angle}deg, ${bg.from}, ${bg.to})` };
-    case 'image':
-      return {
-        backgroundImage: `url(${bg.url})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      };
-    default:
-      return { background: '#000' };
-  }
-}
+import { BlobBackground } from './BlobBackground';
 
 interface Props {
   config: BlobConfig;
@@ -30,8 +13,6 @@ interface Props {
 }
 
 export function BlobCanvas({ config, className, style }: Props) {
-  const bgStyle = useMemo(() => backgroundStyle(config.background), [config.background]);
-
   return (
     <div
       className={className}
@@ -40,7 +21,6 @@ export function BlobCanvas({ config, className, style }: Props) {
         width: '100%',
         height: '100%',
         overflow: 'hidden',
-        ...bgStyle,
         ...style,
       }}
     >
@@ -54,6 +34,7 @@ export function BlobCanvas({ config, className, style }: Props) {
         <directionalLight position={[3, 2, 5]} intensity={config.directionalIntensity} />
         <directionalLight position={[-3, -2, -5]} intensity={config.fillIntensity} />
         <Environment preset="studio" background={false} />
+        <BlobBackground bg={config.background} />
         <GlassBlob config={config} />
       </Canvas>
     </div>

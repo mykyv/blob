@@ -153,12 +153,13 @@ export function ControlsPanel() {
       Background: folder({
         bgMode: {
           value: config.background.mode,
-          options: ['color', 'gradient', 'image'] as const,
-          label: hintLabel('bgMode', 'Source for the canvas background: solid color, two-stop gradient, or image URL.'),
+          options: ['color', 'gradient', 'image', 'dom-snapshot'] as const,
+          label: hintLabel('bgMode', 'Source for the canvas background. dom-snapshot grabs the host page region behind the blob (via html2canvas) so the glass refracts whatever DOM sits behind it.'),
           onChange: (mode: BackgroundConfig['mode']) => {
             if (mode === 'color') setNested('background', { mode: 'color', color: '#0a0418' });
             else if (mode === 'gradient') setNested('background', { mode: 'gradient', from: '#1a1033', to: '#0a0418', angle: 135 });
-            else setNested('background', { mode: 'image', url: '' });
+            else if (mode === 'image') setNested('background', { mode: 'image', url: '' });
+            else setNested('background', { mode: 'dom-snapshot' });
           },
         },
         bgColor: {
