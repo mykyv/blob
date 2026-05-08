@@ -1,5 +1,17 @@
 export type ClickEffect = 'ripple' | 'burst' | 'flash' | 'ripple+burst' | 'ripple+flash' | 'all' | 'none';
 
+export type EnvPreset =
+  | 'studio'
+  | 'city'
+  | 'sunset'
+  | 'dawn'
+  | 'night'
+  | 'warehouse'
+  | 'forest'
+  | 'apartment'
+  | 'park'
+  | 'lobby';
+
 export type BackgroundConfig =
   | { mode: 'color'; color: string }
   | { mode: 'gradient'; from: string; to: string; angle: number }
@@ -61,10 +73,9 @@ export interface BlobConfig {
   flashColor: string;
   flashDuration: number;
 
-  // Lighting
-  ambientIntensity: number;
-  directionalIntensity: number;
-  fillIntensity: number;
+  // Environment lighting
+  envIntensity: number;
+  envPreset: EnvPreset;
 
   // Layout
   cameraFov: number;
@@ -120,9 +131,8 @@ export const defaultConfig: BlobConfig = {
   flashColor: '#ff6bd6',
   flashDuration: 0.6,
 
-  ambientIntensity: 0.7,
-  directionalIntensity: 0.9,
-  fillIntensity: 0.3,
+  envIntensity: 1.0,
+  envPreset: 'studio',
 
   cameraFov: 40,
   cameraZ: 5,

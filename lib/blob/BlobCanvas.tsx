@@ -30,10 +30,11 @@ export function BlobCanvas({ config, className, style }: Props) {
         dpr={[1, 2]}
         gl={{ alpha: true, premultipliedAlpha: false }}
       >
-        <ambientLight intensity={config.ambientIntensity} />
-        <directionalLight position={[3, 2, 5]} intensity={config.directionalIntensity} />
-        <directionalLight position={[-3, -2, -5]} intensity={config.fillIntensity} />
-        <Environment preset="studio" background={false} />
+        <Environment
+          preset={config.envPreset}
+          environmentIntensity={config.envIntensity}
+          background={false}
+        />
         <BlobBackground bg={config.background} />
         <GlassBlob config={config} />
       </Canvas>

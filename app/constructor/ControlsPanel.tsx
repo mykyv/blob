@@ -4,7 +4,7 @@ import { useControls, folder, Leva, useCreateStore, LevaPanel } from 'leva';
 import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useBlobStore } from '@/lib/store';
-import type { ClickEffect, BackgroundConfig } from '@/lib/blob/types';
+import type { ClickEffect, BackgroundConfig, EnvPreset } from '@/lib/blob/types';
 
 function HintLabel({ name, hint }: { name: string; hint: string }) {
   const [open, setOpen] = useState(false);
@@ -328,21 +328,17 @@ export function ControlsPanel() {
           onChange: (v: string) => setNested('flashColor', v),
         },
       }),
-      Lighting: folder({
-        ambientIntensity: {
-          value: config.ambientIntensity, min: 0, max: 3, step: 0.05,
-          label: hintLabel('ambientIntensity', 'Overall fill light. Brightens shadows without adding direction.'),
-          onChange: (v: number) => setNested('ambientIntensity', v),
+      Environment: folder({
+        envIntensity: {
+          value: config.envIntensity, min: 0, max: 3, step: 0.05,
+          label: hintLabel('envIntensity', 'Brightness of the HDRI environment map. Drives the highlights, reflections, and overall apparent lighting on the glass.'),
+          onChange: (v: number) => setNested('envIntensity', v),
         },
-        directionalIntensity: {
-          value: config.directionalIntensity, min: 0, max: 3, step: 0.05,
-          label: hintLabel('directionalIntensity', 'Main key light strength. Drives highlights and primary shading.'),
-          onChange: (v: number) => setNested('directionalIntensity', v),
-        },
-        fillIntensity: {
-          value: config.fillIntensity, min: 0, max: 3, step: 0.05,
-          label: hintLabel('fillIntensity', 'Secondary light from the opposite side, softening the shadow side.'),
-          onChange: (v: number) => setNested('fillIntensity', v),
+        envPreset: {
+          value: config.envPreset,
+          options: ['studio', 'city', 'sunset', 'dawn', 'night', 'warehouse', 'forest', 'apartment', 'park', 'lobby'] as const,
+          label: hintLabel('envPreset', 'HDRI scene used to light the blob. Each preset gives a different highlight color and shape.'),
+          onChange: (v: EnvPreset) => setNested('envPreset', v),
         },
       }),
       Camera: folder({
