@@ -340,7 +340,7 @@ export function ControlsPanel() {
         titleBar={false}
         theme={{
           colors: {
-            elevation1: 'transparent',
+            elevation1: 'rgba(255,255,255,0.08)',
             elevation2: 'rgba(255,255,255,0.04)',
             elevation3: 'rgba(255,255,255,0.06)',
             accent1: '#ff6bd6',
