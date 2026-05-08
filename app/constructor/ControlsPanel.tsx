@@ -3,7 +3,7 @@
 import { useControls, folder, Leva, useCreateStore, LevaPanel } from 'leva';
 import { useEffect } from 'react';
 import { useBlobStore } from '@/lib/store';
-import type { ShapeKey, ClickEffect, BackgroundConfig } from '@/lib/blob/types';
+import type { ClickEffect, BackgroundConfig } from '@/lib/blob/types';
 
 export function ControlsPanel() {
   const config = useBlobStore((s) => s.config);
@@ -12,19 +12,8 @@ export function ControlsPanel() {
 
   const levaStore = useCreateStore();
 
-  // Shape
   useControls(
     {
-      Shape: folder({
-        shape: {
-          value: config.shape,
-          options: ['base', 'laptop', 'camera', 'pen', 'book', 'fuji'] as ShapeKey[],
-          onChange: (v: ShapeKey) => setNested('shape', v),
-          transient: false,
-        },
-        morphEaseIn: { value: config.morphEaseIn, min: 0.01, max: 0.5, step: 0.01, onChange: (v: number) => setNested('morphEaseIn', v) },
-        bounceAmplitude: { value: config.bounceAmplitude, min: 0, max: 0.2, step: 0.005, onChange: (v: number) => setNested('bounceAmplitude', v) },
-      }),
       Material: folder({
         transmission: {
           value: config.transmission, min: 0, max: 1, step: 0.01,

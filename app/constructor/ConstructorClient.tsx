@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { useBlobStore } from '@/lib/store';
 import { decodeConfig, encodeConfig } from '@/lib/encodeParams';
-import { presets } from '@/lib/blob/types';
 import { ControlsPanel } from './ControlsPanel';
 import { ExportDialog } from './ExportDialog';
 
@@ -43,27 +42,12 @@ export function ConstructorClient() {
     return () => clearTimeout(t);
   }, [config]);
 
-  const applyPreset = (name: string) => {
-    const p = presets[name];
-    if (!p) return;
-    replace({ ...useBlobStore.getState().config, ...p } as any);
-  };
-
   return (
     <div className="constructor">
       <div className="constructor-canvas">
         <BlobCanvas config={config} />
       </div>
       <aside className="constructor-panel">
-        <h2>Presets</h2>
-        <div className="constructor-actions">
-          {Object.entries(presets).map(([key, p]) => (
-            <button key={key} className="btn" onClick={() => applyPreset(key)}>
-              {p.name}
-            </button>
-          ))}
-        </div>
-
         {mounted && <ControlsPanel />}
 
         <h2>Export</h2>

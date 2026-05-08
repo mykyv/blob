@@ -1,5 +1,3 @@
-export type ShapeKey = 'base' | 'laptop' | 'camera' | 'pen' | 'book' | 'fuji';
-
 export type ClickEffect = 'ripple' | 'burst' | 'flash' | 'ripple+burst' | 'ripple+flash' | 'all' | 'none';
 
 export type BackgroundConfig =
@@ -12,15 +10,6 @@ export interface BlobConfig {
   // Geometry
   detail: number;
   meshScale: number;
-
-  // Shape / morph
-  shape: ShapeKey;
-  morphEaseIn: number;
-  morphEaseOut: number;
-  bounceAmplitude: number;
-  bounceFrequency: number;
-  bounceDecay: number;
-  bounceDuration: number;
 
   // Material
   transmission: number;
@@ -86,14 +75,6 @@ export const defaultConfig: BlobConfig = {
   detail: 18,
   meshScale: 0.95,
 
-  shape: 'base',
-  morphEaseIn: 0.10,
-  morphEaseOut: 0.09,
-  bounceAmplitude: 0.04,
-  bounceFrequency: 14,
-  bounceDecay: 5,
-  bounceDuration: 0.8,
-
   transmission: 1,
   ior: 1.25,
   thickness: 0.35,
@@ -145,40 +126,4 @@ export const defaultConfig: BlobConfig = {
 
   cameraFov: 40,
   cameraZ: 5,
-};
-
-export const presets: Record<string, Partial<BlobConfig> & { name: string }> = {
-  portfolio: {
-    name: 'Portfolio',
-    transmission: 1,
-    ior: 1.25,
-    thickness: 0.35,
-    roughness: 0.02,
-    chromaticAberration: 0.35,
-    distortion: 0.15,
-    temporalDistortion: 0.08,
-    noiseAmplitude: 0.32,
-    targetLerp: 0.018,
-    currentLerp: 0.012,
-    stretchK: 1.9,
-    maxStretch: 1.15,
-    background: { mode: 'gradient', from: '#1a1033', to: '#0a0418', angle: 135 },
-  },
-  minimal: {
-    name: 'Minimal',
-    chromaticAberration: 0.05,
-    distortion: 0.05,
-    temporalDistortion: 0.02,
-    noiseAmplitude: 0.18,
-    background: { mode: 'color', color: '#0a0a0a' },
-  },
-};
-
-export const noiseDampPerShape: Record<ShapeKey, number> = {
-  base: 0,
-  laptop: 0.99,
-  camera: 0.92,
-  pen: 0.95,
-  book: 0.95,
-  fuji: 0.99,
 };

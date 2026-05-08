@@ -5,9 +5,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { MeshTransmissionMaterial } from '@react-three/drei';
 import { createNoise3D } from 'simplex-noise';
 import * as THREE from 'three';
-import type { BlobConfig, ShapeKey } from './types';
-import { noiseDampPerShape } from './types';
-import { findFarR, shapeSdfs } from './sdfs';
+import type { BlobConfig } from './types';
 
 interface Impulse {
   x: number; y: number; z: number;
@@ -50,18 +48,6 @@ export function GlassBlob({ config }: Props) {
   const n2 = useMemo(() => createNoise3D(), []);
   const n3 = useMemo(() => createNoise3D(), []);
 
-  // Morph targets: built async per shape
-  const morphTargets = useRef<Record<string, Float32Array>>({});
-  const buildState = useRef<{ shape: ShapeKey | null; idx: number; out: Float32Array | null }>({
-    shape: null, idx: 0, out: null,
-  });
-
-  // Reset built targets when geometry changes (vertex count)
-  useEffect(() => {
-    morphTargets.current = {};
-    buildState.current = { shape: null, idx: 0, out: null };
-  }, [geometry]);
-
   // Cursor tracking
   const rawTarget = useRef(new THREE.Vector2(0, 0));
   const target = useRef(new THREE.Vector2(0, 0));
@@ -72,17 +58,6 @@ export function GlassBlob({ config }: Props) {
   const impulses = useRef<Impulse[]>([]);
   const burst = useRef<BurstState | null>(null);
   const flash = useRef<FlashState | null>(null);
-
-  // Morph state
-  const morphT = useRef(0);
-  const morphCurrent = useRef<ShapeKey>(config.shape);
-  const morphPending = useRef<ShapeKey>(config.shape);
-  const morphBounceStart = useRef(-Infinity);
-
-  // Watch shape changes
-  useEffect(() => {
-    morphPending.current = config.shape;
-  }, [config.shape]);
 
   // Mouse listener (window-relative normalized)
   useEffect(() => {
@@ -142,38 +117,6 @@ export function GlassBlob({ config }: Props) {
     return () => dom.removeEventListener('pointerdown', onDown);
   }, [gl, camera, config.clickEnabled, config.clickEffect]);
 
-  // Build morph targets incrementally for a single shape
-  const tickBuild = (deadline: number) => {
-    const cfg = cfgRef.current;
-    const pos = geometry.attributes.position.array as Float32Array;
-    const base = geometry.userData.basePositions as Float32Array;
-    const vertCount = base.length / 3;
-
-    let st = buildState.current;
-    if (st.shape === null || st.shape === 'base') return;
-    if (!st.out) st.out = new Float32Array(base.length);
-
-    const sdf = shapeSdfs[st.shape as Exclude<ShapeKey, 'base'>];
-    const VERTS_PER_CHUNK = 40;
-    let processed = 0;
-
-    while (st.idx < vertCount && processed < VERTS_PER_CHUNK && performance.now() < deadline) {
-      const i = st.idx * 3;
-      const dx = base[i], dy = base[i + 1], dz = base[i + 2];
-      const r = findFarR(sdf, dx, dy, dz);
-      st.out[i] = dx * r;
-      st.out[i + 1] = dy * r;
-      st.out[i + 2] = dz * r;
-      st.idx++;
-      processed++;
-    }
-
-    if (st.idx >= vertCount) {
-      morphTargets.current[st.shape] = st.out;
-      buildState.current = { shape: null, idx: 0, out: null };
-    }
-  };
-
   useFrame((state, delta) => {
     const cfg = cfgRef.current;
     const t = state.clock.elapsedTime;
@@ -209,29 +152,7 @@ export function GlassBlob({ config }: Props) {
       }
     }
 
-    // Async morph build
-    const pending = morphPending.current;
-    const haveTarget = pending === 'base' || morphTargets.current[pending];
-    if (!haveTarget && buildState.current.shape !== pending) {
-      buildState.current = { shape: pending, idx: 0, out: null };
-    }
-    if (buildState.current.shape && buildState.current.shape !== 'base') {
-      tickBuild(performance.now() + 5);
-    }
-
-    // Morph easing — deflate to base, swap, reinflate
-    const wantSwap = morphCurrent.current !== pending;
-    const targetT = wantSwap ? 0 : 1;
-    const easeRate = wantSwap ? cfg.morphEaseOut : cfg.morphEaseIn;
-    morphT.current += (targetT - morphT.current) * easeRate;
-    if (wantSwap && morphT.current < 0.02 && (pending === 'base' || morphTargets.current[pending])) {
-      morphCurrent.current = pending;
-      morphBounceStart.current = t;
-    }
-
-    const m = morphT.current;
-    const dampK = noiseDampPerShape[morphCurrent.current] ?? 0;
-    const noiseAmt = cfg.noiseAmplitude * (1 - m * dampK);
+    const noiseAmt = cfg.noiseAmplitude;
 
     // Cursor follow
     target.current.lerp(rawTarget.current, cfg.targetLerp);
@@ -285,7 +206,6 @@ export function GlassBlob({ config }: Props) {
     // Vertex deformation
     const pos = geometry.attributes.position.array as Float32Array;
     const base = geometry.userData.basePositions as Float32Array;
-    const morph = morphTargets.current[morphCurrent.current];
     const vertCount = base.length / 3;
 
     // Pull direction (opposite of cursor lag for trail bias)
@@ -295,14 +215,6 @@ export function GlassBlob({ config }: Props) {
     for (let i = 0; i < vertCount; i++) {
       const ix = i * 3;
       const bx = base[ix], by = base[ix + 1], bz = base[ix + 2];
-
-      // Morph target
-      let tx = bx, ty = by, tz = bz;
-      if (morph && m > 0.001) {
-        tx = bx + (morph[ix] - bx) * m;
-        ty = by + (morph[ix + 1] - by) * m;
-        tz = bz + (morph[ix + 2] - bz) * m;
-      }
 
       // Noise
       const nLow = n1(bx * cfg.noiseLowScale, by * cfg.noiseLowScale, bz * cfg.noiseLowScale + t * cfg.noiseLowSpeed);
@@ -322,7 +234,7 @@ export function GlassBlob({ config }: Props) {
         cleanupAfter.push(imp);
         const dot = bx * imp.x + by * imp.y + bz * imp.z;
         const d = Math.acos(Math.max(-1, Math.min(1, dot)));
-        const localT = elapsed - d * (1 / cfg.ripplePropagationSpeed) * 0.18; // approximate spec: localT = elapsed - d*0.18
+        const localT = elapsed - d * (1 / cfg.ripplePropagationSpeed) * 0.18;
         if (localT < 0) continue;
         const env = Math.exp(-localT * cfg.rippleDecay);
         const osc = Math.sin(localT * cfg.rippleOscFrequency);
@@ -331,17 +243,10 @@ export function GlassBlob({ config }: Props) {
       }
       if (cleanupAfter.length !== impulses.current.length) impulses.current = cleanupAfter;
 
-      // Morph bounce
-      let bounce = 0;
-      const tau = t - morphBounceStart.current;
-      if (tau > 0 && tau < cfg.bounceDuration) {
-        bounce = Math.sin(tau * cfg.bounceFrequency) * Math.exp(-tau * cfg.bounceDecay) * cfg.bounceAmplitude * m;
-      }
-
-      const f = 1 + noise * noiseAmt - wave * cfg.rippleAmplitude + bounce + trail;
-      pos[ix] = tx * f;
-      pos[ix + 1] = ty * f;
-      pos[ix + 2] = tz * f;
+      const f = 1 + noise * noiseAmt - wave * cfg.rippleAmplitude + trail;
+      pos[ix] = bx * f;
+      pos[ix + 1] = by * f;
+      pos[ix + 2] = bz * f;
     }
 
     geometry.attributes.position.needsUpdate = true;
