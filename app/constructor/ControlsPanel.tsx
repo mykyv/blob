@@ -21,13 +21,15 @@ function HintLabel({ name, hint }: { name: string; hint: string }) {
   const hide = () => setOpen(false);
 
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+    <span
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, cursor: 'help' }}
+      onMouseEnter={show}
+      onMouseLeave={hide}
+    >
       {name}
       <span
         ref={iconRef}
         aria-label={hint}
-        onMouseEnter={show}
-        onMouseLeave={hide}
         onFocus={show}
         onBlur={hide}
         tabIndex={0}
@@ -43,7 +45,6 @@ function HintLabel({ name, hint }: { name: string; hint: string }) {
           lineHeight: 1,
           opacity: 0.5,
           fontWeight: 700,
-          cursor: 'help',
           userSelect: 'none',
         }}
       >

@@ -64,7 +64,7 @@ button { font: inherit; cursor: pointer; }
 
 .constructor {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: 1fr 420px;
   height: 100vh;
 }
 .constructor-canvas { position: relative; }
