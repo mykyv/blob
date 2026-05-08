@@ -150,6 +150,19 @@ export const defaultConfig: BlobConfig = {
 export const presets: Record<string, Partial<BlobConfig> & { name: string }> = {
   portfolio: {
     name: 'Portfolio',
+    transmission: 1,
+    ior: 1.25,
+    thickness: 0.35,
+    roughness: 0.02,
+    chromaticAberration: 0.35,
+    distortion: 0.15,
+    temporalDistortion: 0.08,
+    noiseAmplitude: 0.32,
+    targetLerp: 0.018,
+    currentLerp: 0.012,
+    stretchK: 1.9,
+    maxStretch: 1.15,
+    background: { mode: 'gradient', from: '#1a1033', to: '#0a0418', angle: 135 },
   },
   minimal: {
     name: 'Minimal',

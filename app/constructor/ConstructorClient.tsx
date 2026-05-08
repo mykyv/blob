@@ -46,8 +46,7 @@ export function ConstructorClient() {
   const applyPreset = (name: string) => {
     const p = presets[name];
     if (!p) return;
-    if (name === 'portfolio') reset();
-    else replace({ ...useBlobStore.getState().config, ...p } as any);
+    replace({ ...useBlobStore.getState().config, ...p } as any);
   };
 
   return (
