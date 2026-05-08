@@ -332,7 +332,7 @@ export function ControlsPanel() {
   );
 
   return (
-    <div style={{ marginTop: '1rem' }}>
+    <div className="controls-leva" style={{ marginTop: '1rem' }}>
       <LevaPanel
         store={levaStore}
         fill
@@ -342,11 +342,16 @@ export function ControlsPanel() {
         theme={{
           colors: {
             elevation1: 'rgba(255,255,255,0.08)',
-            elevation2: 'rgba(255,255,255,0.04)',
+            elevation2: 'transparent',
             elevation3: 'rgba(255,255,255,0.06)',
             accent1: '#f4f4f5',
             accent2: '#f4f4f5',
             accent3: '#ffffff',
+          },
+          space: {
+            sm: '14px',
+            md: '14px',
+            rowGap: '10px',
           },
         }}
       />
