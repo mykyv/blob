@@ -1,6 +1,7 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
+import { Environment } from '@react-three/drei';
 import { useMemo } from 'react';
 import type { BlobConfig, BackgroundConfig } from './types';
 import { GlassBlob } from './GlassBlob';
@@ -45,12 +46,14 @@ export function BlobCanvas({ config, className, style }: Props) {
     >
       <Canvas
         camera={{ position: [0, 0, config.cameraZ], fov: config.cameraFov }}
-        style={{ position: 'absolute', inset: 0 }}
+        style={{ position: 'absolute', inset: 0, background: 'transparent' }}
         dpr={[1, 2]}
+        gl={{ alpha: true, premultipliedAlpha: false }}
       >
         <ambientLight intensity={config.ambientIntensity} />
         <directionalLight position={[3, 2, 5]} intensity={config.directionalIntensity} />
         <directionalLight position={[-3, -2, -5]} intensity={config.fillIntensity} />
+        <Environment preset="studio" background={false} />
         <GlassBlob config={config} />
       </Canvas>
     </div>

@@ -86,7 +86,7 @@ export const defaultConfig: BlobConfig = {
   attenuationColor: '#ffffff',
   attenuationDistance: 1.0,
 
-  background: { mode: 'gradient', from: '#1a1033', to: '#0a0418', angle: 135 },
+  background: { mode: 'color', color: '#ffffff' },
 
   noiseAmplitude: 0.32,
   noiseLowScale: 0.75,
