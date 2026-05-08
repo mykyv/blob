@@ -48,14 +48,17 @@ export function ConstructorClient() {
         <BlobCanvas config={config} />
       </div>
       <aside className="constructor-panel">
-        {mounted && <ControlsPanel />}
-
-        <h2>Export</h2>
-        <div className="constructor-actions">
-          <button className="btn btn-primary" onClick={() => setExportOpen(true)}>
-            Get embed code
-          </button>
-          <button className="btn" onClick={reset}>Reset</button>
+        <div className="constructor-panel-scroll">
+          {mounted && <ControlsPanel />}
+        </div>
+        <div className="constructor-export">
+          <h2>Export</h2>
+          <div className="constructor-actions">
+            <button className="btn btn-primary" onClick={() => setExportOpen(true)}>
+              Get embed code
+            </button>
+            <button className="btn" onClick={reset}>Reset</button>
+          </div>
         </div>
       </aside>
       {exportOpen && <ExportDialog onClose={() => setExportOpen(false)} />}

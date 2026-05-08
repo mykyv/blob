@@ -65,7 +65,7 @@ function HintLabel({ name, hint }: { name: string; hint: string }) {
                 fontSize: 11,
                 lineHeight: 1.4,
                 borderRadius: 6,
-                border: '1px solid rgba(255, 107, 214, 0.35)',
+                border: '1px solid rgba(244, 244, 245, 0.35)',
                 boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                 pointerEvents: 'none',
                 zIndex: 10000,
@@ -338,14 +338,15 @@ export function ControlsPanel() {
         fill
         flat
         titleBar={false}
+        hideCopyButton
         theme={{
           colors: {
             elevation1: 'rgba(255,255,255,0.08)',
             elevation2: 'rgba(255,255,255,0.04)',
             elevation3: 'rgba(255,255,255,0.06)',
-            accent1: '#ff6bd6',
-            accent2: '#ff6bd6',
-            accent3: '#ff8ddf',
+            accent1: '#f4f4f5',
+            accent2: '#f4f4f5',
+            accent3: '#ffffff',
           },
         }}
       />

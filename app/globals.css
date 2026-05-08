@@ -40,15 +40,19 @@ button { font: inherit; cursor: pointer; }
   align-items: center;
   gap: 0.5rem;
   padding: 0.85rem 1.6rem;
-  background: #ff6bd6;
+  background: #f4f4f5;
   color: #0a0418;
   border: none;
   border-radius: 999px;
   font-weight: 600;
   text-decoration: none;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.25);
 }
-.landing-cta:hover { transform: translateY(-2px); }
+.landing-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 32px rgba(255, 255, 255, 0.4);
+}
 .landing-blob {
   position: absolute;
   inset: 0;
@@ -69,9 +73,15 @@ button { font: inherit; cursor: pointer; }
 }
 .constructor-canvas { position: relative; }
 .constructor-panel {
+  display: flex;
+  flex-direction: column;
   border-left: 1px solid rgba(255,255,255,0.08);
   background: rgba(10, 4, 24, 0.85);
   backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+.constructor-panel-scroll {
+  flex: 1;
   overflow-y: auto;
   padding: 1rem;
 }
@@ -89,22 +99,39 @@ button { font: inherit; cursor: pointer; }
   flex-wrap: wrap;
   margin-top: 1rem;
 }
+.constructor-export {
+  flex-shrink: 0;
+  padding: 1.25rem;
+  background: #0a0418;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.constructor-export h2 {
+  margin: 0 0 0.85rem;
+}
+.constructor-export .constructor-actions {
+  margin-top: 0;
+  gap: 0.65rem;
+}
 .btn {
-  padding: 0.5rem 0.85rem;
-  background: rgba(255,255,255,0.08);
+  padding: 0.6rem 1.1rem;
+  background: rgba(255,255,255,0.06);
   color: inherit;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
   font-size: 0.875rem;
-  transition: background 0.15s ease;
+  font-weight: 500;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
-.btn:hover { background: rgba(255,255,255,0.15); }
+.btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.18);
+}
 .btn-primary {
-  background: #ff6bd6;
+  background: #f4f4f5;
   color: #0a0418;
-  border-color: #ff6bd6;
+  border-color: #f4f4f5;
 }
-.btn-primary:hover { background: #ff8ddf; }
+.btn-primary:hover { background: #e4e4e7; }
 
 .dialog-backdrop {
   position: fixed;
@@ -140,7 +167,7 @@ button { font: inherit; cursor: pointer; }
   opacity: 0.6;
 }
 .dialog .tabs button.active {
-  border-bottom-color: #ff6bd6;
+  border-bottom-color: #f4f4f5;
   opacity: 1;
 }
 .dialog pre {
