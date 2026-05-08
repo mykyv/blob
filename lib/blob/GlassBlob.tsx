@@ -36,6 +36,15 @@ export function GlassBlob({ config }: Props) {
   const cfgRef = useRef(config);
   useEffect(() => { cfgRef.current = config; }, [config]);
 
+  // Keep camera position/fov in sync with config (Canvas `camera` prop is only initial)
+  useEffect(() => {
+    camera.position.set(0, 0, config.cameraZ);
+    if ((camera as THREE.PerspectiveCamera).isPerspectiveCamera) {
+      (camera as THREE.PerspectiveCamera).fov = config.cameraFov;
+      (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
+    }
+  }, [camera, config.cameraZ, config.cameraFov]);
+
   // Geometry — only rebuilt on detail change
   const geometry = useMemo(() => {
     const g = new THREE.IcosahedronGeometry(1, config.detail);
