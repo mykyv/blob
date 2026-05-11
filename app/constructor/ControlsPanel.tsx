@@ -277,6 +277,18 @@ export function ControlsPanel() {
           render: (get) => get('Click.clickEnabled'),
           onChange: (v: ClickEffect) => setNested('clickEffect', v),
         },
+        clickReactionDelay: {
+          value: config.clickReactionDelay, min: -0.3, max: 0.5, step: 0.01,
+          label: hintLabel('clickReactionDelay', 'Time between click and visible reaction. Negative = quicker (wave starts closer to peak), positive = adds delay before the wave appears.'),
+          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'ripple',
+          onChange: (v: number) => setNested('clickReactionDelay', v),
+        },
+        rippleOscFrequency: {
+          value: config.rippleOscFrequency, min: 1, max: 20, step: 0.5,
+          label: hintLabel('rippleOscFrequency', 'How fast the wave oscillates. Higher = quicker buildup to peak, snappier reaction.'),
+          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'ripple',
+          onChange: (v: number) => setNested('rippleOscFrequency', v),
+        },
         ripplePropagationSpeed: {
           value: config.ripplePropagationSpeed, min: 0.05, max: 1, step: 0.01,
           label: hintLabel('ripplePropagationSpeed', 'How fast the ripple wave travels across the surface.'),
@@ -332,7 +344,7 @@ export function ControlsPanel() {
   );
 
   return (
-    <div className="controls-leva" style={{ marginTop: '1rem' }}>
+    <div className="controls-leva">
       <LevaPanel
         store={levaStore}
         fill
@@ -352,6 +364,10 @@ export function ControlsPanel() {
             sm: '14px',
             md: '14px',
             rowGap: '10px',
+          },
+          sizes: {
+            controlWidth: '200px',
+            numberInputMinWidth: '52px',
           },
         }}
       />

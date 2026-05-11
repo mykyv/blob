@@ -60,6 +60,7 @@ export interface BlobConfig {
   // Click ripples / effect
   clickEnabled: boolean;
   clickEffect: ClickEffect;
+  clickReactionDelay: number;
   ripplePropagationSpeed: number;
   rippleOscFrequency: number;
   rippleDecay: number;
@@ -116,8 +117,9 @@ export const defaultConfig: BlobConfig = {
 
   clickEnabled: true,
   clickEffect: 'ripple',
+  clickReactionDelay: 0,
   ripplePropagationSpeed: 0.18,
-  rippleOscFrequency: 6.0,
+  rippleOscFrequency: 10.0,
   rippleDecay: 1.15,
   rippleSpatialFalloff: 0.45,
   rippleAmplitude: 0.55,

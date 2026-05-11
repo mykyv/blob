@@ -1,15 +1,68 @@
+/* ─── Design tokens ────────────────────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --bg: #0a0418;
+  --bg-panel: rgba(10, 4, 24, 0.85);
+  --surface-1: #14082a;
+  --surface-2: rgba(255, 255, 255, 0.06);
+  --surface-3: rgba(255, 255, 255, 0.12);
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Text */
+  --text: #f4f1ff;
+  --text-muted: rgba(244, 241, 255, 0.6);
+  --text-faint: rgba(244, 241, 255, 0.4);
+
+  /* Accent (neutral light) */
+  --accent: #f4f4f5;
+  --accent-hover: #e4e4e7;
+  --on-accent: #0a0418;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.85rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  /* Typography */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+
+  /* Motion */
+  --transition: 0.15s ease;
+
+  /* Shadows */
+  --glow: 0 0 24px rgba(255, 255, 255, 0.25);
+  --glow-strong: 0 0 32px rgba(255, 255, 255, 0.4);
+}
+
+/* ─── Base ─────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; height: 100%; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  background: #0a0418;
-  color: #f4f1ff;
+  background: var(--bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 a { color: inherit; }
 button { font: inherit; cursor: pointer; }
 
+/* ─── Landing ──────────────────────────────────────────────────────────── */
 .landing {
   min-height: 100vh;
   display: flex;
@@ -26,32 +79,32 @@ button { font: inherit; cursor: pointer; }
 .landing-hero h1 {
   font-size: clamp(2rem, 6vw, 4.5rem);
   font-weight: 700;
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-4);
   letter-spacing: -0.02em;
 }
 .landing-hero p {
   font-size: clamp(1rem, 2vw, 1.25rem);
   max-width: 38rem;
-  margin: 0 auto 2rem;
+  margin: 0 auto var(--space-6);
   opacity: 0.85;
 }
 .landing-cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   padding: 0.85rem 1.6rem;
-  background: #f4f4f5;
-  color: #0a0418;
+  background: var(--accent);
+  color: var(--on-accent);
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-weight: 600;
   text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 0 24px rgba(255, 255, 255, 0.25);
+  transition: transform var(--transition), box-shadow var(--transition);
+  box-shadow: var(--glow);
 }
 .landing-cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 32px rgba(255, 255, 255, 0.4);
+  box-shadow: var(--glow-strong);
 }
 .landing-blob {
   position: absolute;
@@ -60,122 +113,126 @@ button { font: inherit; cursor: pointer; }
   pointer-events: none;
 }
 .landing-footer {
-  padding: 2rem;
+  padding: var(--space-6);
   text-align: center;
-  opacity: 0.6;
-  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
 }
 
+/* ─── Constructor layout ───────────────────────────────────────────────── */
 .constructor {
   display: grid;
-  grid-template-columns: 1fr 420px;
+  grid-template-columns: 1fr 480px;
   height: 100vh;
 }
 .constructor-canvas { position: relative; }
 .constructor-panel {
   display: flex;
   flex-direction: column;
-  border-left: 1px solid rgba(255,255,255,0.08);
-  background: rgba(10, 4, 24, 0.85);
+  border-left: 1px solid var(--border);
+  background: var(--bg-panel);
   backdrop-filter: blur(8px);
   overflow: hidden;
 }
 .constructor-panel-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
 }
-.controls-leva > div > div > div { row-gap: 0; }
 .constructor-panel h2 {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  opacity: 0.6;
-  margin: 1.5rem 0 0.5rem;
+  color: var(--text-muted);
+  margin: var(--space-5) 0 var(--space-2);
 }
 .constructor-panel h2:first-child { margin-top: 0; }
-.constructor-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-top: 1rem;
-}
 .constructor-export {
   flex-shrink: 0;
   padding: 1.25rem;
-  background: #0a0418;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
 }
-.constructor-export h2 {
-  margin: 0 0 0.85rem;
+.constructor-export h2 { margin: 0 0 var(--space-3); }
+.constructor-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-4);
 }
 .constructor-export .constructor-actions {
   margin-top: 0;
   gap: 0.65rem;
 }
+
+/* ─── Buttons ──────────────────────────────────────────────────────────── */
 .btn {
   padding: 0.6rem 1.1rem;
-  background: rgba(255,255,255,0.06);
+  background: var(--surface-2);
   color: inherit;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  font-size: 0.875rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   font-weight: 500;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background var(--transition), border-color var(--transition);
 }
 .btn:hover {
-  background: rgba(255,255,255,0.12);
-  border-color: rgba(255,255,255,0.18);
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 .btn-primary {
-  background: #f4f4f5;
-  color: #0a0418;
-  border-color: #f4f4f5;
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
 }
-.btn-primary:hover { background: #e4e4e7; }
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 
+/* ─── Dialog ───────────────────────────────────────────────────────────── */
 .dialog-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   display: grid;
   place-items: center;
   z-index: 100;
 }
 .dialog {
-  background: #14082a;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
   width: min(560px, 90vw);
   max-height: 80vh;
   overflow-y: auto;
 }
-.dialog h3 { margin: 0 0 0.5rem; }
+.dialog h3 { margin: 0 0 var(--space-2); }
 .dialog .tabs {
   display: flex;
-  gap: 0.25rem;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  margin: 1rem 0;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--border-strong);
+  margin: var(--space-4) 0;
 }
 .dialog .tabs button {
-  padding: 0.5rem 0.85rem;
+  padding: var(--space-2) var(--space-3);
   background: transparent;
   color: inherit;
   border: none;
   border-bottom: 2px solid transparent;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   opacity: 0.6;
 }
 .dialog .tabs button.active {
-  border-bottom-color: #f4f4f5;
+  border-bottom-color: var(--accent);
   opacity: 1;
 }
 .dialog pre {
-  background: #0a0418;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 6px;
-  padding: 0.85rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
   overflow-x: auto;
   font-size: 0.8rem;
   white-space: pre-wrap;
@@ -184,11 +241,120 @@ button { font: inherit; cursor: pointer; }
 .dialog .dialog-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
 }
 
+/* ─── Leva overrides (scoped) ──────────────────────────────────────────── */
+.controls-leva > div > div > div { row-gap: 0; }
+
+/* Flat layout: no inner "box", sections sit directly on the panel bg.
+   Leva's root paints elevation1 as a background; we kill that here. */
+.controls-leva > div { background: transparent !important; }
+
+/* Number values: left-align with tighter padding (Leva defaults to right + space.sm padding) */
+.controls-leva input[type="text"],
+.controls-leva input[type="number"] {
+  text-align: left !important;
+  padding: 0 8px !important;
+}
+
+/* Checkbox: dark check on light accent background */
+.controls-leva input[type="checkbox"] + label > svg { stroke: var(--on-accent); }
+
+/* Unchecked checkbox: stronger outline so the box is visible against the dark panel */
+.controls-leva input[type="checkbox"] + label {
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+.controls-leva input[type="checkbox"]:checked + label {
+  box-shadow: none;
+}
+
+/*
+ * Folder wrappers: Leva's useToggle hook sets an explicit pixel height on
+ * expand/collapse so the height can animate. It only re-measures on toggle, so
+ * when children appear/disappear via `render` conditions the wrapper keeps a
+ * stale height — leaving empty space below the visible controls. Force open
+ * wrappers to size to content; leave collapsed wrappers (height: 0px) alone.
+ */
+.controls-leva div[style*="height"]:not([style*="height: 0px"]) {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* ─── Design-system page ───────────────────────────────────────────────── */
+.ds {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+}
+.ds h1 {
+  font-size: 2rem;
+  margin: 0 0 var(--space-2);
+}
+.ds-lede {
+  color: var(--text-muted);
+  margin: 0 0 var(--space-6);
+}
+.ds-section {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border);
+}
+.ds-section:last-child { border-bottom: none; }
+.ds-section h2 {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-4);
+}
+.ds-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+.ds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+.ds-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+.ds-swatch {
+  height: 56px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: var(--space-2);
+}
+.ds-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  display: block;
+  word-break: break-all;
+}
+.ds-token {
+  font-size: var(--font-size-xs);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--text);
+}
+.ds-type-sample {
+  margin: 0 0 var(--space-2);
+}
+.ds-spacing-bar {
+  height: 12px;
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .constructor { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
-  .constructor-panel { border-left: none; border-top: 1px solid rgba(255,255,255,0.08); max-height: 50vh; }
+  .constructor-panel { border-left: none; border-top: 1px solid var(--border); max-height: 50vh; }
 }
