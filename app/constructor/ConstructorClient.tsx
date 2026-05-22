@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { useBlobStore } from '@/lib/store';
 import { decodeConfig, encodeConfig } from '@/lib/encodeParams';
+import { randomizeConfig } from '@/lib/blob/randomize';
 import { ControlsPanel } from './ControlsPanel';
 import { ExportDialog } from './ExportDialog';
 
@@ -18,14 +19,27 @@ export function ConstructorClient() {
   const reset = useBlobStore((s) => s.reset);
   const [exportOpen, setExportOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [panelEpoch, setPanelEpoch] = useState(0);
   useEffect(() => setMounted(true), []);
+
+  const replaceAndRemount = (next: typeof config) => {
+    replace(next);
+    setPanelEpoch((n) => n + 1);
+  };
+
+  const randomize = () => replaceAndRemount(randomizeConfig(useBlobStore.getState().config));
+  const resetAndRemount = () => {
+    reset();
+    setPanelEpoch((n) => n + 1);
+  };
 
   // Load from URL on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const p = params.get('p');
-    if (p) replace(decodeConfig(p));
-  }, [replace]);
+    if (p) replaceAndRemount(decodeConfig(p));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Push to URL on change (debounced)
   useEffect(() => {
@@ -49,15 +63,16 @@ export function ConstructorClient() {
       </div>
       <aside className="constructor-panel">
         <div className="constructor-panel-scroll">
-          {mounted && <ControlsPanel />}
+          {mounted && <ControlsPanel key={panelEpoch} />}
         </div>
         <div className="constructor-export">
           <h2>Export</h2>
           <div className="constructor-actions">
+            <button className="btn" onClick={randomize}>Randomize</button>
+            <button className="btn" onClick={resetAndRemount}>Reset</button>
             <button className="btn btn-primary" onClick={() => setExportOpen(true)}>
               Get embed code
             </button>
-            <button className="btn" onClick={reset}>Reset</button>
           </div>
         </div>
       </aside>

@@ -1,11 +1,18 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useBlobStore } from '@/lib/store';
 import { encodeConfig } from '@/lib/encodeParams';
 import { defaultConfig } from '@/lib/blob/types';
 
-type Tab = 'embed' | 'json' | 'url' | 'html';
+type Tab = 'embed' | 'url' | 'json' | 'html';
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'embed', label: 'Embed snippet' },
+  { id: 'url', label: 'Share URL' },
+  { id: 'json', label: 'JSON config' },
+  { id: 'html', label: 'Standalone HTML' },
+];
 
 const EMBED_BASE = typeof window !== 'undefined' ? window.location.origin : 'https://glassblob.app';
 
@@ -23,6 +30,12 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
   const config = useBlobStore((s) => s.config);
   const [tab, setTab] = useState<Tab>('embed');
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
 
   const diff = useMemo(() => diffJson(config), [config]);
   const jsonText = useMemo(() => JSON.stringify(diff, null, 2), [diff]);
@@ -69,27 +82,49 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="dialog-backdrop" onClick={onClose}>
-      <div className="dialog" onClick={(e) => e.stopPropagation()}>
-        <h3>Export your blob</h3>
-        <p style={{ opacity: 0.7, fontSize: '0.875rem', margin: 0 }}>
-          Pick the format that fits where you're using it.
-        </p>
-        <div className="tabs">
-          <button className={tab === 'embed' ? 'active' : ''} onClick={() => setTab('embed')}>Embed snippet</button>
-          <button className={tab === 'url' ? 'active' : ''} onClick={() => setTab('url')}>Share URL</button>
-          <button className={tab === 'json' ? 'active' : ''} onClick={() => setTab('json')}>JSON config</button>
-          <button className={tab === 'html' ? 'active' : ''} onClick={() => setTab('html')}>Standalone HTML</button>
+    <>
+      <div className="sheet-backdrop" onClick={onClose} />
+      <aside className="export-sheet" role="dialog" aria-label="Export your blob">
+        <header className="export-sheet-header">
+          <div>
+            <h3>Export</h3>
+            <p>Pick the format that fits where you're using it.</p>
+          </div>
+          <button className="sheet-close" onClick={onClose} aria-label="Close">×</button>
+        </header>
+
+        <nav className="export-sheet-tabs" role="tablist">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={tab === t.id}
+              className={tab === t.id ? 'active' : ''}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="export-sheet-body">
+          <div className="code-block">
+            <button className="code-copy" onClick={copy}>
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+            <pre>{text}</pre>
+          </div>
         </div>
-        <pre>{text}</pre>
-        <div className="dialog-actions">
-          {tab === 'html' && <button className="btn" onClick={download}>Download .html</button>}
+
+        <footer className="export-sheet-footer">
+          {tab === 'html' && (
+            <button className="btn" onClick={download}>Download .html</button>
+          )}
           <button className="btn btn-primary" onClick={copy}>
             {copied ? 'Copied!' : 'Copy to clipboard'}
           </button>
-          <button className="btn" onClick={onClose}>Close</button>
-        </div>
-      </div>
-    </div>
+        </footer>
+      </aside>
+    </>
   );
 }

@@ -1,25 +1,27 @@
-/* ─── Design tokens ────────────────────────────────────────────────────── */
+/* ─── Design tokens (shadcn-style neutral zinc) ────────────────────────── */
 :root {
-  /* Surfaces */
-  --bg: #0a0418;
-  --bg-panel: rgba(10, 4, 24, 0.85);
-  --surface-1: #14082a;
-  --surface-2: rgba(255, 255, 255, 0.06);
-  --surface-3: rgba(255, 255, 255, 0.12);
+  /* Surfaces — layer hierarchy: bg < surface-1 (card) > code (back to bg) */
+  --bg: #09090b;                 /* zinc-950 — page background */
+  --bg-panel: rgba(9, 9, 11, 0.92);
+  --surface-1: #131316;          /* one shade up — cards, sheets, dialogs */
+  --surface-2: #1f1f23;          /* secondary button bg, input bg */
+  --surface-3: #2a2a30;          /* hover on surface-2 */
+  --code-bg: #09090b;            /* code blocks sit *below* the card */
 
-  /* Borders */
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.18);
+  /* Borders — quiet by default, stronger for inputs/buttons */
+  --border: #232328;             /* near zinc-800 */
+  --border-strong: #34343a;      /* near zinc-700 */
+  --ring: rgba(244, 244, 245, 0.45);
 
   /* Text */
-  --text: #f4f1ff;
-  --text-muted: rgba(244, 241, 255, 0.6);
-  --text-faint: rgba(244, 241, 255, 0.4);
+  --text: #fafafa;               /* zinc-50 */
+  --text-muted: #a1a1aa;         /* zinc-400 */
+  --text-faint: #71717a;         /* zinc-500 */
 
-  /* Accent (neutral light) */
-  --accent: #f4f4f5;
+  /* Accent — bright neutral primary, like shadcn's default dark theme */
+  --accent: #fafafa;
   --accent-hover: #e4e4e7;
-  --on-accent: #0a0418;
+  --on-accent: #09090b;
 
   /* Radii */
   --radius-sm: 6px;
@@ -121,18 +123,30 @@ button { font: inherit; cursor: pointer; }
 
 /* ─── Constructor layout ───────────────────────────────────────────────── */
 .constructor {
-  display: grid;
-  grid-template-columns: 1fr 480px;
+  position: relative;
   height: 100vh;
+  overflow: hidden;
 }
-.constructor-canvas { position: relative; }
+.constructor-canvas {
+  position: absolute;
+  inset: 0;
+}
 .constructor-panel {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  width: 420px;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid var(--border);
   background: var(--bg-panel);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   overflow: hidden;
+  z-index: 10;
 }
 .constructor-panel-scroll {
   flex: 1;
@@ -149,7 +163,7 @@ button { font: inherit; cursor: pointer; }
 .constructor-export {
   flex-shrink: 0;
   padding: 1.25rem;
-  background: var(--bg);
+  background: rgba(9, 9, 11, 0.6);
   border-top: 1px solid var(--border);
 }
 .constructor-export h2 { margin: 0 0 var(--space-3); }
@@ -190,59 +204,150 @@ button { font: inherit; cursor: pointer; }
 }
 .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 
-/* ─── Dialog ───────────────────────────────────────────────────────────── */
-.dialog-backdrop {
+/* ─── Export sheet (right-side slide-in) ───────────────────────────────── */
+@keyframes sheet-fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes sheet-slide-in {
+  from { transform: translateX(calc(100% + 32px)); opacity: 0 }
+  to { transform: translateX(0); opacity: 1 }
+}
+
+.sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: grid;
-  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
   z-index: 100;
+  animation: sheet-fade-in 160ms ease-out;
 }
-.dialog {
+.export-sheet {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  width: min(560px, calc(100vw - 32px));
   background: var(--surface-1);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  width: min(560px, 90vw);
-  max-height: 80vh;
-  overflow-y: auto;
-}
-.dialog h3 { margin: 0 0 var(--space-2); }
-.dialog .tabs {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   display: flex;
-  gap: var(--space-1);
-  border-bottom: 1px solid var(--border-strong);
-  margin: var(--space-4) 0;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 101;
+  animation: sheet-slide-in 240ms cubic-bezier(0.32, 0.72, 0, 1);
 }
-.dialog .tabs button {
-  padding: var(--space-2) var(--space-3);
+.export-sheet-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 1.25rem 1.25rem 1rem;
+}
+.export-sheet-header h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.export-sheet-header p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+.sheet-close {
   background: transparent;
-  color: inherit;
+  color: var(--text-muted);
+  border: none;
+  border-radius: var(--radius-sm);
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+.sheet-close:hover { background: var(--surface-2); color: var(--text); }
+
+.export-sheet-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 1.25rem;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.export-sheet-tabs button {
+  position: relative;
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--text-muted);
   border: none;
   border-bottom: 2px solid transparent;
-  font-size: var(--font-size-sm);
-  opacity: 0.6;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-bottom: -1px;
+  transition: color var(--transition), border-color var(--transition);
 }
-.dialog .tabs button.active {
-  border-bottom-color: var(--accent);
-  opacity: 1;
+.export-sheet-tabs button:first-child { padding-left: 0; }
+.export-sheet-tabs button:hover { color: var(--text); }
+.export-sheet-tabs button.active {
+  border-bottom-color: var(--text);
+  color: var(--text);
 }
-.dialog pre {
-  background: var(--bg);
+
+.export-sheet-body {
+  flex: 1;
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+}
+.code-block {
+  position: relative;
+  background: var(--code-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-3);
-  overflow-x: auto;
-  font-size: 0.8rem;
+  border-radius: var(--radius-md);
+}
+.code-block pre {
+  margin: 0;
+  padding: 14px 16px;
+  padding-right: 72px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text);
   white-space: pre-wrap;
   word-break: break-all;
+  overflow-x: auto;
 }
-.dialog .dialog-actions {
+.code-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), border-color var(--transition);
+}
+.code-copy:hover { background: var(--surface-3); border-color: var(--border-strong); }
+
+.export-sheet-footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
-  margin-top: var(--space-4);
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 720px) {
+  .export-sheet {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+  }
 }
 
 /* ─── Leva overrides (scoped) ──────────────────────────────────────────── */
@@ -252,12 +357,47 @@ button { font: inherit; cursor: pointer; }
    Leva's root paints elevation1 as a background; we kill that here. */
 .controls-leva > div { background: transparent !important; }
 
-/* Number values: left-align with tighter padding (Leva defaults to right + space.sm padding) */
+/* Inputs (number values, color hex, dropdowns): higher-contrast text */
 .controls-leva input[type="text"],
-.controls-leva input[type="number"] {
+.controls-leva input[type="number"],
+.controls-leva select {
   text-align: left !important;
   padding: 0 8px !important;
+  color: var(--text) !important;
+  font-weight: 500;
 }
+
+/* Control row labels — the left column ("transmission", "ior", etc.) */
+.controls-leva [class*="Label-"],
+.controls-leva label {
+  color: var(--text) !important;
+  opacity: 0.92;
+  font-weight: 500;
+}
+
+/* Folder section titles — bolder + uppercase, shadcn section-header feel */
+.controls-leva [class*="Folder-"] > div:first-child,
+.controls-leva [class*="StyledTitle"] {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 1 !important;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+/* Subtle divider between folder sections */
+.controls-leva > div > div > div > div + div {
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  padding-top: 6px;
+}
+
+/* Slider track + value text contrast */
+.controls-leva [class*="Range"] [class*="Indicator"] { background: var(--accent) !important; }
+.controls-leva [class*="Range"] [class*="Scrubber"] { background: var(--accent) !important; }
 
 /* Checkbox: dark check on light accent background */
 .controls-leva input[type="checkbox"] + label > svg { stroke: var(--on-accent); }
@@ -355,6 +495,12 @@ button { font: inherit; cursor: pointer; }
 
 /* ─── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .constructor { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
-  .constructor-panel { border-left: none; border-top: 1px solid var(--border); max-height: 50vh; }
+  .constructor-panel {
+    top: auto;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    max-height: 60vh;
+  }
 }

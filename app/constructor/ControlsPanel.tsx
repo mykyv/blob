@@ -43,7 +43,7 @@ function HintLabel({ name, hint }: { name: string; hint: string }) {
           border: '1px solid currentColor',
           fontSize: 9,
           lineHeight: 1,
-          opacity: 0.5,
+          opacity: 0.75,
           fontWeight: 700,
           userSelect: 'none',
         }}
@@ -355,19 +355,30 @@ export function ControlsPanel() {
           colors: {
             elevation1: 'rgba(255,255,255,0.08)',
             elevation2: 'transparent',
-            elevation3: 'rgba(255,255,255,0.06)',
+            elevation3: 'rgba(255,255,255,0.10)',
             accent1: '#f4f4f5',
             accent2: '#f4f4f5',
             accent3: '#ffffff',
+            highlight1: 'rgba(244, 241, 255, 0.78)',
+            highlight2: 'rgba(244, 241, 255, 0.95)',
+            highlight3: '#ffffff',
+            folderWidgetColor: 'rgba(244, 241, 255, 0.85)',
+            folderTextColor: '#ffffff',
+          },
+          fonts: {
+            mono: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+          },
+          fontSizes: {
+            root: '13px',
           },
           space: {
             sm: '14px',
             md: '14px',
-            rowGap: '10px',
+            rowGap: '12px',
           },
           sizes: {
             controlWidth: '200px',
-            numberInputMinWidth: '52px',
+            numberInputMinWidth: '56px',
           },
         }}
       />
