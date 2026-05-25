@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npm run build:embed",
+    "build": "npm run build:embed && next build",
     "build:embed": "vite build -c embed/vite.config.ts",
     "start": "next start",
     "lint": "next lint",

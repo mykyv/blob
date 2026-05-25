@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GlassBlob embed test</title>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; background: #0a0418; color: #f4f1ff;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+    .wrap { display: grid; grid-template-rows: auto 1fr; height: 100%; }
+    h1 { padding: 1.5rem; margin: 0; font-weight: 500; }
+    .blob { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Plain HTML page — blob embedded below.</h1>
+    <div class="blob" data-glassblob='{"chromaticAberration":0.6,"shape":"camera"}'></div>
+  </div>
+  <script src="/embed/glassblob.js"></script>
+</body>
+</html>
