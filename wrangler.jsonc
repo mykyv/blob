@@ -1,5 +1,5 @@
 {
-  "name": "blob-constructor",
+  "name": "blob",
   "compatibility_date": "2026-05-12",
   "assets": { "directory": "./out" }
 }
