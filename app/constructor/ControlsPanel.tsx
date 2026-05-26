@@ -98,6 +98,8 @@ export function ControlsPanel() {
   const config = useBlobStore((s) => s.config);
   const setNested = useBlobStore((s) => s.setNested);
   const setConfig = useBlobStore((s) => s.setConfig);
+  const imageError = useBlobStore((s) => s.imageError);
+  const setImageError = useBlobStore((s) => s.setImageError);
 
   const levaStore = useCreateStore();
 
@@ -157,6 +159,7 @@ export function ControlsPanel() {
           options: ['color', 'gradient', 'image', 'dom-snapshot'] as const,
           label: hintLabel('bgMode', 'Source for the canvas background. dom-snapshot grabs the host page region behind the blob (via html2canvas) so the glass refracts whatever DOM sits behind it.'),
           onChange: (mode: BackgroundConfig['mode']) => {
+            setImageError(null);
             if (mode === 'color') setNested('background', { mode: 'color', color: '#0a0418' });
             else if (mode === 'gradient') setNested('background', { mode: 'gradient', from: '#1a1033', to: '#0a0418', angle: 135 });
             else if (mode === 'image') setNested('background', { mode: 'image', url: '' });
@@ -196,7 +199,10 @@ export function ControlsPanel() {
           render: (get) => get('Background.bgMode') === 'image',
           onChange: (v: string) => {
             const cur = useBlobStore.getState().config.background;
-            if (cur.mode === 'image') setNested('background', { mode: 'image', url: v });
+            if (cur.mode === 'image') {
+              setImageError(null);
+              setNested('background', { mode: 'image', url: v });
+            }
           },
         },
       }),
@@ -343,8 +349,33 @@ export function ControlsPanel() {
     { store: levaStore },
   );
 
+  const showImageError = config.background.mode === 'image' && !!imageError;
+
   return (
     <div className="controls-leva">
+      {showImageError ? (
+        <div
+          role="alert"
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 2,
+            margin: '8px 10px',
+            padding: '8px 10px',
+            borderRadius: 6,
+            border: '1px solid rgba(248, 113, 113, 0.45)',
+            background: 'rgba(20, 14, 30, 0.96)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+            color: '#fecaca',
+            fontSize: 12,
+            lineHeight: 1.4,
+            fontFamily:
+              'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+          }}
+        >
+          {imageError}
+        </div>
+      ) : null}
       <LevaPanel
         store={levaStore}
         fill
