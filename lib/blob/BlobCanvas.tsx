@@ -29,6 +29,19 @@ export function BlobCanvas({ config, className, style }: Props) {
         style={{ position: 'absolute', inset: 0, background: 'transparent' }}
         dpr={[1, 2]}
         gl={{ alpha: true, premultipliedAlpha: false }}
+        onCreated={({ gl }) => {
+          const canvas = gl.domElement;
+          const onLost = (e: Event) => {
+            // preventDefault tells the browser we want the context restored.
+            e.preventDefault();
+            console.warn('[BlobCanvas] WebGL context lost');
+          };
+          const onRestored = () => {
+            console.info('[BlobCanvas] WebGL context restored');
+          };
+          canvas.addEventListener('webglcontextlost', onLost as EventListener);
+          canvas.addEventListener('webglcontextrestored', onRestored as EventListener);
+        }}
       >
         <Environment
           preset={config.envPreset}

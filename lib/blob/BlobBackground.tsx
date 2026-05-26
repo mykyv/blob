@@ -1,8 +1,9 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useBlobStore } from '@/lib/store';
 import type { BackgroundConfig } from './types';
 
 const PLANE_Z = -10;
@@ -184,19 +185,51 @@ function DomSnapshotBg() {
   );
 }
 
+interface ImageBoundaryProps {
+  onError: (message: string) => void;
+  fallback: ReactNode;
+  children: ReactNode;
+}
+
+class ImageErrorBoundary extends Component<ImageBoundaryProps, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    const raw = error instanceof Error ? error.message : String(error ?? '');
+    const msg = /could not load/i.test(raw)
+      ? "Couldn't load image. The host may not allow cross-origin access — try a CORS-friendly URL (e.g. Unsplash, imgur direct links)."
+      : raw || 'Image failed to load.';
+    // Defer so we don't update a sibling store during the catch phase of another render.
+    queueMicrotask(() => this.props.onError(msg));
+  }
+
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
 interface Props {
   bg: BackgroundConfig;
 }
 
 export function BlobBackground({ bg }: Props) {
+  const setImageError = useBlobStore((s) => s.setImageError);
+
   if (bg.mode === 'color') return <ColorBg color={bg.color} />;
   if (bg.mode === 'gradient') return <GradientBg from={bg.from} to={bg.to} angle={bg.angle} />;
   if (bg.mode === 'image') {
     if (!bg.url) return <ColorBg color="#ffffff" />;
     return (
-      <Suspense fallback={<ColorBg color="#ffffff" />}>
-        <ImageBg url={bg.url} />
-      </Suspense>
+      <ImageErrorBoundary key={bg.url} onError={setImageError} fallback={<ColorBg color="#ffffff" />}>
+        <Suspense fallback={<ColorBg color="#ffffff" />}>
+          <ImageBg url={bg.url} />
+        </Suspense>
+      </ImageErrorBoundary>
     );
   }
   if (bg.mode === 'dom-snapshot') return <DomSnapshotBg />;
