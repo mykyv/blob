@@ -19,7 +19,7 @@ export default function HomePage() {
       </div>
       <footer className="landing-footer">
         <p>
-          Open source · <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
+          Open source · <a href="https://github.com/mykyv/blob" target="_blank" rel="noopener noreferrer">GitHub</a>
           {' · '}
           <Link href="/about">How it works</Link>
         </p>

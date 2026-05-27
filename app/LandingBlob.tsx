@@ -8,6 +8,11 @@ const BlobCanvas = dynamic(
   { ssr: false },
 );
 
+const landingConfig = {
+  ...defaultConfig,
+  background: { mode: 'gradient', from: '#0b0b12', to: '#1a1530', angle: 160 },
+} as typeof defaultConfig;
+
 export function LandingBlob() {
-  return <BlobCanvas config={defaultConfig} />;
+  return <BlobCanvas config={landingConfig} />;
 }

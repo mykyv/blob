@@ -28,6 +28,11 @@ export default function AboutPage() {
         bundle works wherever you can paste HTML.
       </p>
       <p>
+        For surfaces that don't run third-party scripts (Notion <code>/embed</code>, no-JS
+        previews, sandboxed CMS blocks), the constructor also emits a plain <code>/view</code>{' '}
+        URL you can drop into any iframe.
+      </p>
+      <p>
         For React users, the JSON config plugs straight into the <code>BlobCanvas</code> component
         from the source repo.
       </p>
