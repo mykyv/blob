@@ -273,10 +273,13 @@ button { font: inherit; cursor: pointer; }
   padding: 0 1.25rem;
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.export-sheet-tabs::-webkit-scrollbar { display: none; }
 .export-sheet-tabs button {
   position: relative;
-  padding: 10px 14px;
+  padding: 10px 10px;
   background: transparent;
   color: var(--text-muted);
   border: none;

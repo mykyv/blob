@@ -8,11 +8,11 @@ import { defaultConfig } from '@/lib/blob/types';
 type Tab = 'embed' | 'iframe' | 'url' | 'json' | 'html';
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'embed', label: 'Embed snippet' },
-  { id: 'iframe', label: 'Iframe embed' },
+  { id: 'embed', label: 'Embed' },
+  { id: 'iframe', label: 'Iframe' },
   { id: 'url', label: 'Share URL' },
-  { id: 'json', label: 'JSON config' },
-  { id: 'html', label: 'Standalone HTML' },
+  { id: 'json', label: 'JSON' },
+  { id: 'html', label: 'HTML' },
 ];
 
 const HELP: Partial<Record<Tab, string>> = {
