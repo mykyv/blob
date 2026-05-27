@@ -51,14 +51,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
 
   const shareUrl = `${EMBED_BASE}/constructor?p=${encodeConfig(config)}`;
 
-  const iframeSnippet = `<iframe
-  src="${EMBED_BASE}/view?p=${encodeConfig(config)}"
-  width="100%"
-  height="500"
-  style="border:0;display:block"
-  allow="autoplay"
-  loading="lazy"
-  title="GlassBlob"></iframe>`;
+  const iframeSnippet = `${EMBED_BASE}/view?p=${encodeConfig(config)}`;
 
   const standaloneHtml = `<!doctype html>
 <html lang="en">
