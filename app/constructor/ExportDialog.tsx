@@ -5,14 +5,19 @@ import { useBlobStore } from '@/lib/store';
 import { encodeConfig } from '@/lib/encodeParams';
 import { defaultConfig } from '@/lib/blob/types';
 
-type Tab = 'embed' | 'url' | 'json' | 'html';
+type Tab = 'embed' | 'iframe' | 'url' | 'json' | 'html';
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'embed', label: 'Embed snippet' },
+  { id: 'iframe', label: 'Iframe embed' },
   { id: 'url', label: 'Share URL' },
   { id: 'json', label: 'JSON config' },
   { id: 'html', label: 'Standalone HTML' },
 ];
+
+const HELP: Partial<Record<Tab, string>> = {
+  iframe: "Paste into Notion via /embed, or anywhere that accepts an iframe URL.",
+};
 
 const EMBED_BASE = typeof window !== 'undefined' ? window.location.origin : 'https://glassblob.app';
 
@@ -46,6 +51,15 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
 
   const shareUrl = `${EMBED_BASE}/constructor?p=${encodeConfig(config)}`;
 
+  const iframeSnippet = `<iframe
+  src="${EMBED_BASE}/view?p=${encodeConfig(config)}"
+  width="100%"
+  height="500"
+  style="border:0;display:block"
+  allow="autoplay"
+  loading="lazy"
+  title="GlassBlob"></iframe>`;
+
   const standaloneHtml = `<!doctype html>
 <html lang="en">
 <head>
@@ -61,6 +75,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
 
   const text =
     tab === 'embed' ? embedSnippet :
+    tab === 'iframe' ? iframeSnippet :
     tab === 'json' ? jsonText :
     tab === 'url' ? shareUrl :
     standaloneHtml;
@@ -114,6 +129,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
             </button>
             <pre>{text}</pre>
           </div>
+          {HELP[tab] && <p className="export-sheet-hint">{HELP[tab]}</p>}
         </div>
 
         <footer className="export-sheet-footer">
