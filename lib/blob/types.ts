@@ -106,7 +106,7 @@ export const defaultConfig: BlobConfig = {
   noiseHighWeight: 0.08,
   trailBiasWeight: 0.45,
 
-  followEnabled: true,
+  followEnabled: false,
   targetLerp: 0.018,
   currentLerp: 0.012,
   stretchK: 1.9,
