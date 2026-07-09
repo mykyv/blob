@@ -1,418 +1,301 @@
 'use client';
 
-import { useControls, folder, Leva, useCreateStore, LevaPanel } from 'leva';
-import { useEffect, useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { useBlobStore } from '@/lib/store';
-import type { ClickEffect, BackgroundConfig, EnvPreset } from '@/lib/blob/types';
+import type {
+  ClickEffect,
+  BackgroundConfig,
+  EnvPreset,
+} from '@/lib/blob/types';
+import {
+  Section,
+  Slider,
+  ColorRow,
+  SelectRow,
+  Toggle,
+  TextRow,
+} from './controls/Primitives';
 
-function HintLabel({ name, hint }: { name: string; hint: string }) {
-  const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
-  const iconRef = useRef<HTMLSpanElement>(null);
+export type ControlsTab = 'design' | 'effects';
 
-  const show = () => {
-    const el = iconRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    setPos({ left: r.left + r.width / 2, top: r.top });
-    setOpen(true);
-  };
-  const hide = () => setOpen(false);
+const BG_MODES = ['color', 'gradient', 'image', 'dom-snapshot'] as const;
+const CLICK_EFFECTS: ClickEffect[] = ['ripple', 'burst'];
+const ENV_PRESETS: EnvPreset[] = [
+  'studio',
+  'city',
+  'sunset',
+  'dawn',
+  'night',
+  'warehouse',
+  'forest',
+  'apartment',
+  'park',
+  'lobby',
+];
 
-  return (
-    <span
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, cursor: 'help' }}
-      onMouseEnter={show}
-      onMouseLeave={hide}
-    >
-      {name}
-      <span
-        ref={iconRef}
-        aria-label={hint}
-        onFocus={show}
-        onBlur={hide}
-        tabIndex={0}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 13,
-          height: 13,
-          borderRadius: '50%',
-          border: '1px solid currentColor',
-          fontSize: 9,
-          lineHeight: 1,
-          opacity: 0.75,
-          fontWeight: 700,
-          userSelect: 'none',
-        }}
-      >
-        ?
-      </span>
-      {open && pos && typeof document !== 'undefined'
-        ? createPortal(
-            <div
-              style={{
-                position: 'fixed',
-                left: pos.left,
-                top: pos.top - 8,
-                transform: 'translate(-100%, -100%)',
-                maxWidth: 240,
-                padding: '8px 10px',
-                background: 'rgba(20, 14, 30, 0.96)',
-                color: '#f3e9ff',
-                fontSize: 11,
-                lineHeight: 1.4,
-                borderRadius: 6,
-                border: '1px solid rgba(244, 244, 245, 0.35)',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-                pointerEvents: 'none',
-                zIndex: 10000,
-                fontFamily:
-                  'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-                whiteSpace: 'normal',
-              }}
-            >
-              {hint}
-            </div>,
-            document.body,
-          )
-        : null}
-    </span>
-  );
-}
-
-const labelCache = new Map<string, JSX.Element>();
-const hintLabel = (name: string, hint: string) => {
-  const key = `${name}::${hint}`;
-  let el = labelCache.get(key);
-  if (!el) {
-    el = <HintLabel name={name} hint={hint} />;
-    labelCache.set(key, el);
-  }
-  return el;
-};
-
-export function ControlsPanel() {
+export function ControlsPanel({ activeTab }: { activeTab: ControlsTab }) {
   const config = useBlobStore((s) => s.config);
-  const setNested = useBlobStore((s) => s.setNested);
-  const setConfig = useBlobStore((s) => s.setConfig);
-  const imageError = useBlobStore((s) => s.imageError);
+  const set = useBlobStore((s) => s.setNested);
   const setImageError = useBlobStore((s) => s.setImageError);
 
-  const levaStore = useCreateStore();
+  const glass = config.transmission > 0.02;
+  const bg = config.background;
 
-  useControls(
-    {
-      Material: folder({
-        transmission: {
-          value: config.transmission, min: 0, max: 1, step: 0.01,
-          label: hintLabel('transmission', 'How much light passes through the blob. 0 = solid, 1 = fully transparent glass.'),
-          onChange: (v: number) => setNested('transmission', v),
-        },
-        ior: {
-          value: config.ior, min: 1, max: 2.5, step: 0.01,
-          label: hintLabel('ior', 'Index of refraction. Higher values bend light more (water 1.33, glass 1.5, diamond 2.4).'),
-          render: (get) => get('Material.transmission') > 0.02,
-          onChange: (v: number) => setNested('ior', v),
-        },
-        thickness: {
-          value: config.thickness, min: 0, max: 2, step: 0.01,
-          label: hintLabel('thickness', 'Apparent glass thickness. Affects how much the surface refracts and tints transmitted light.'),
-          render: (get) => get('Material.transmission') > 0.02,
-          onChange: (v: number) => setNested('thickness', v),
-        },
-        roughness: {
-          value: config.roughness, min: 0, max: 1, step: 0.01,
-          label: hintLabel('roughness', 'Surface micro-roughness. 0 is mirror-smooth, 1 is fully diffuse/frosted.'),
-          onChange: (v: number) => setNested('roughness', v),
-        },
-        chromaticAberration: {
-          value: config.chromaticAberration, min: 0, max: 1, step: 0.01,
-          label: hintLabel('chromaticAberration', 'Splits transmitted light into RGB fringes for a prism-like edge effect.'),
-          render: (get) => get('Material.transmission') > 0.02,
-          onChange: (v: number) => setNested('chromaticAberration', v),
-        },
-        distortion: {
-          value: config.distortion, min: 0, max: 1, step: 0.01,
-          label: hintLabel('distortion', 'Warps the refracted background, giving the glass a wobbly, hand-blown look.'),
-          render: (get) => get('Material.transmission') > 0.02,
-          onChange: (v: number) => setNested('distortion', v),
-        },
-        temporalDistortion: {
-          value: config.temporalDistortion, min: 0, max: 0.5, step: 0.01,
-          label: hintLabel('temporalDistortion', 'Animates the distortion over time so refractions shimmer instead of staying static.'),
-          render: (get) => get('Material.transmission') > 0.02,
-          onChange: (v: number) => setNested('temporalDistortion', v),
-        },
-        attenuationColor: {
-          value: config.attenuationColor,
-          label: hintLabel('attenuationColor', 'Tint that builds up as light travels through the glass volume.'),
-          render: (get) => get('Material.transmission') > 0.02,
-          onChange: (v: string) => setNested('attenuationColor', v),
-        },
-      }),
-      Background: folder({
-        bgMode: {
-          value: config.background.mode,
-          options: ['color', 'gradient', 'image', 'dom-snapshot'] as const,
-          label: hintLabel('bgMode', 'Source for the canvas background. dom-snapshot grabs the host page region behind the blob (via html2canvas) so the glass refracts whatever DOM sits behind it.'),
-          onChange: (mode: BackgroundConfig['mode']) => {
-            setImageError(null);
-            if (mode === 'color') setNested('background', { mode: 'color', color: '#0a0418' });
-            else if (mode === 'gradient') setNested('background', { mode: 'gradient', from: '#1a1033', to: '#0a0418', angle: 135 });
-            else if (mode === 'image') setNested('background', { mode: 'image', url: '' });
-            else setNested('background', { mode: 'dom-snapshot' });
-          },
-        },
-        bgColor: {
-          value: config.background.mode === 'color' ? config.background.color : '#0a0418',
-          label: hintLabel('bgColor', 'Solid background color shown behind the blob.'),
-          render: (get) => get('Background.bgMode') === 'color',
-          onChange: (v: string) => {
-            const cur = useBlobStore.getState().config.background;
-            if (cur.mode === 'color') setNested('background', { mode: 'color', color: v });
-          },
-        },
-        bgFrom: {
-          value: config.background.mode === 'gradient' ? config.background.from : '#1a1033',
-          label: hintLabel('bgFrom', 'Gradient start color.'),
-          render: (get) => get('Background.bgMode') === 'gradient',
-          onChange: (v: string) => {
-            const cur = useBlobStore.getState().config.background;
-            if (cur.mode === 'gradient') setNested('background', { ...cur, from: v });
-          },
-        },
-        bgTo: {
-          value: config.background.mode === 'gradient' ? config.background.to : '#0a0418',
-          label: hintLabel('bgTo', 'Gradient end color.'),
-          render: (get) => get('Background.bgMode') === 'gradient',
-          onChange: (v: string) => {
-            const cur = useBlobStore.getState().config.background;
-            if (cur.mode === 'gradient') setNested('background', { ...cur, to: v });
-          },
-        },
-        bgImageUrl: {
-          value: config.background.mode === 'image' ? config.background.url : '',
-          label: hintLabel('bgImageUrl', 'URL of an image to use as the background (CORS-enabled host required).'),
-          render: (get) => get('Background.bgMode') === 'image',
-          onChange: (v: string) => {
-            const cur = useBlobStore.getState().config.background;
-            if (cur.mode === 'image') {
-              setImageError(null);
-              setNested('background', { mode: 'image', url: v });
-            }
-          },
-        },
-      }),
-      Motion: folder({
-        noiseAmplitude: {
-          value: config.noiseAmplitude, min: 0, max: 1, step: 0.01,
-          label: hintLabel('noiseAmplitude', 'How far the surface deforms from its rest shape. Higher = more wobble.'),
-          onChange: (v: number) => setNested('noiseAmplitude', v),
-        },
-        noiseLowSpeed: {
-          value: config.noiseLowSpeed, min: 0, max: 0.5, step: 0.01,
-          label: hintLabel('noiseLowSpeed', 'Speed of slow, large-scale undulations. Sets the overall breathing pace.'),
-          onChange: (v: number) => setNested('noiseLowSpeed', v),
-        },
-        noiseHighSpeed: {
-          value: config.noiseHighSpeed, min: 0, max: 0.5, step: 0.01,
-          label: hintLabel('noiseHighSpeed', 'Speed of fast, fine-scale ripples layered on top of the slow motion.'),
-          onChange: (v: number) => setNested('noiseHighSpeed', v),
-        },
-        trailBiasWeight: {
-          value: config.trailBiasWeight, min: 0, max: 1, step: 0.01,
-          label: hintLabel('trailBiasWeight', 'How strongly the deformation lags behind the cursor, leaving a trailing shape.'),
-          onChange: (v: number) => setNested('trailBiasWeight', v),
-        },
-        idleDriftAmplitude: {
-          value: config.idleDriftAmplitude, min: 0, max: 0.3, step: 0.005,
-          label: hintLabel('idleDriftAmplitude', 'Subtle ambient motion when the cursor is still, so the blob never goes fully static.'),
-          onChange: (v: number) => setNested('idleDriftAmplitude', v),
-        },
-      }),
-      Cursor: folder({
-        followEnabled: {
-          value: config.followEnabled,
-          label: hintLabel('followEnabled', 'Master toggle for cursor-following behavior.'),
-          onChange: (v: boolean) => setNested('followEnabled', v),
-        },
-        targetLerp: {
-          value: config.targetLerp, min: 0.001, max: 0.2, step: 0.001,
-          label: hintLabel('targetLerp', 'How quickly the target position chases the cursor. Higher = snappier, lower = lazier.'),
-          render: (get) => get('Cursor.followEnabled'),
-          onChange: (v: number) => setNested('targetLerp', v),
-        },
-        currentLerp: {
-          value: config.currentLerp, min: 0.001, max: 0.2, step: 0.001,
-          label: hintLabel('currentLerp', 'Smoothing on the actual position toward the target. Lower = more inertia.'),
-          render: (get) => get('Cursor.followEnabled'),
-          onChange: (v: number) => setNested('currentLerp', v),
-        },
-        stretchK: {
-          value: config.stretchK, min: 0, max: 5, step: 0.1,
-          label: hintLabel('stretchK', 'How much the blob stretches toward the cursor based on cursor velocity.'),
-          render: (get) => get('Cursor.followEnabled'),
-          onChange: (v: number) => setNested('stretchK', v),
-        },
-        maxStretch: {
-          value: config.maxStretch, min: 0, max: 3, step: 0.05,
-          label: hintLabel('maxStretch', "Upper limit on stretching, so fast cursor movement can't tear the shape apart."),
-          render: (get) => get('Cursor.followEnabled'),
-          onChange: (v: number) => setNested('maxStretch', v),
-        },
-        deadZone: {
-          value: config.deadZone, min: 0, max: 0.5, step: 0.01,
-          label: hintLabel('deadZone', 'Cursor distance under which no follow happens, preventing jitter near rest.'),
-          render: (get) => get('Cursor.followEnabled'),
-          onChange: (v: number) => setNested('deadZone', v),
-        },
-      }),
-      Click: folder({
-        clickEnabled: {
-          value: config.clickEnabled,
-          label: hintLabel('clickEnabled', 'Master toggle for click-triggered effects.'),
-          onChange: (v: boolean) => setNested('clickEnabled', v),
-        },
-        clickEffect: {
-          value: config.clickEffect,
-          options: ['ripple', 'burst'] as ClickEffect[],
-          label: hintLabel('clickEffect', 'Which effect fires on click: ripple wave or outward burst.'),
-          render: (get) => get('Click.clickEnabled'),
-          onChange: (v: ClickEffect) => setNested('clickEffect', v),
-        },
-        clickReactionDelay: {
-          value: config.clickReactionDelay, min: -0.3, max: 0.5, step: 0.01,
-          label: hintLabel('clickReactionDelay', 'Time between click and visible reaction. Negative = quicker (wave starts closer to peak), positive = adds delay before the wave appears.'),
-          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'ripple',
-          onChange: (v: number) => setNested('clickReactionDelay', v),
-        },
-        rippleOscFrequency: {
-          value: config.rippleOscFrequency, min: 1, max: 20, step: 0.5,
-          label: hintLabel('rippleOscFrequency', 'How fast the wave oscillates. Higher = quicker buildup to peak, snappier reaction.'),
-          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'ripple',
-          onChange: (v: number) => setNested('rippleOscFrequency', v),
-        },
-        ripplePropagationSpeed: {
-          value: config.ripplePropagationSpeed, min: 0.05, max: 1, step: 0.01,
-          label: hintLabel('ripplePropagationSpeed', 'How fast the ripple wave travels across the surface.'),
-          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'ripple',
-          onChange: (v: number) => setNested('ripplePropagationSpeed', v),
-        },
-        rippleAmplitude: {
-          value: config.rippleAmplitude, min: 0, max: 2, step: 0.05,
-          label: hintLabel('rippleAmplitude', 'Height of the ripple wave at impact.'),
-          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'ripple',
-          onChange: (v: number) => setNested('rippleAmplitude', v),
-        },
-        rippleDecay: {
-          value: config.rippleDecay, min: 0.1, max: 5, step: 0.05,
-          label: hintLabel('rippleDecay', 'How quickly the ripple fades. Higher = shorter, snappier ripple.'),
-          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'ripple',
-          onChange: (v: number) => setNested('rippleDecay', v),
-        },
-        burstScale: {
-          value: config.burstScale, min: 0, max: 1, step: 0.01,
-          label: hintLabel('burstScale', 'Size of the outward push at the click point.'),
-          render: (get) => get('Click.clickEnabled') && get('Click.clickEffect') === 'burst',
-          onChange: (v: number) => setNested('burstScale', v),
-        },
-      }),
-      Environment: folder({
-        envIntensity: {
-          value: config.envIntensity, min: 0, max: 3, step: 0.05,
-          label: hintLabel('envIntensity', 'Brightness of the HDRI environment map. Drives the highlights, reflections, and overall apparent lighting on the glass.'),
-          onChange: (v: number) => setNested('envIntensity', v),
-        },
-        envPreset: {
-          value: config.envPreset,
-          options: ['studio', 'city', 'sunset', 'dawn', 'night', 'warehouse', 'forest', 'apartment', 'park', 'lobby'] as const,
-          label: hintLabel('envPreset', 'HDRI scene used to light the blob. Each preset gives a different highlight color and shape.'),
-          onChange: (v: EnvPreset) => setNested('envPreset', v),
-        },
-      }),
-      Camera: folder({
-        cameraFov: {
-          value: config.cameraFov, min: 10, max: 120, step: 1,
-          label: hintLabel('cameraFov', 'Field of view in degrees. Low = telephoto/flat, high = wide-angle/distorted.'),
-          onChange: (v: number) => setNested('cameraFov', v),
-        },
-        cameraZ: {
-          value: config.cameraZ, min: 1, max: 20, step: 0.1,
-          label: hintLabel('cameraZ', 'Camera distance from the blob. Larger = blob appears smaller.'),
-          onChange: (v: number) => setNested('cameraZ', v),
-        },
-      }),
-    },
-    { store: levaStore },
-  );
+  const setBgMode = (mode: BackgroundConfig['mode']) => {
+    setImageError(null);
+    if (mode === 'color') set('background', { mode: 'color', color: '#0a0418' });
+    else if (mode === 'gradient')
+      set('background', { mode: 'gradient', from: '#1a1033', to: '#0a0418', angle: 135 });
+    else if (mode === 'image') set('background', { mode: 'image', url: '' });
+    else set('background', { mode: 'dom-snapshot' });
+  };
 
-  const showImageError = config.background.mode === 'image' && !!imageError;
+  if (activeTab === 'design') {
+    return (
+      <div className="controls">
+        <Section title="Surface">
+          <Slider
+            label="transmission" value={config.transmission} min={0} max={1} step={0.01}
+            hint="How much light passes through the blob. 0 = solid, 1 = fully transparent glass."
+            onChange={(v) => set('transmission', v)}
+          />
+          {glass && (
+            <>
+              <Slider
+                label="ior" value={config.ior} min={1} max={2.5} step={0.01}
+                hint="Index of refraction. Higher values bend light more (water 1.33, glass 1.5, diamond 2.4)."
+                onChange={(v) => set('ior', v)}
+              />
+              <Slider
+                label="thickness" value={config.thickness} min={0} max={2} step={0.01}
+                hint="Apparent glass thickness. Affects how much the surface refracts and tints transmitted light."
+                onChange={(v) => set('thickness', v)}
+              />
+            </>
+          )}
+          <Slider
+            label="roughness" value={config.roughness} min={0} max={1} step={0.01}
+            hint="Surface micro-roughness. 0 is mirror-smooth, 1 is fully diffuse/frosted."
+            onChange={(v) => set('roughness', v)}
+          />
+          {glass && (
+            <>
+              <Slider
+                label="chromaticAberration" value={config.chromaticAberration} min={0} max={1} step={0.01}
+                hint="Splits transmitted light into RGB fringes for a prism-like edge effect."
+                onChange={(v) => set('chromaticAberration', v)}
+              />
+              <Slider
+                label="distortion" value={config.distortion} min={0} max={1} step={0.01}
+                hint="Warps the refracted background, giving the glass a wobbly, hand-blown look."
+                onChange={(v) => set('distortion', v)}
+              />
+              <Slider
+                label="temporalDistortion" value={config.temporalDistortion} min={0} max={0.5} step={0.01}
+                hint="Animates the distortion over time so refractions shimmer instead of staying static."
+                onChange={(v) => set('temporalDistortion', v)}
+              />
+            </>
+          )}
+        </Section>
 
+        {glass && (
+          <Section title="Colors">
+            <ColorRow
+              label="attenuationColor" value={config.attenuationColor}
+              hint="Tint that builds up as light travels through the glass volume."
+              onChange={(v) => set('attenuationColor', v)}
+            />
+          </Section>
+        )}
+
+        <Section title="Environment">
+          <Slider
+            label="envIntensity" value={config.envIntensity} min={0} max={3} step={0.05}
+            hint="Brightness of the HDRI environment map. Drives the highlights, reflections, and overall apparent lighting on the glass."
+            onChange={(v) => set('envIntensity', v)}
+          />
+          <SelectRow
+            label="envPreset" value={config.envPreset} options={ENV_PRESETS}
+            hint="HDRI scene used to light the blob. Each preset gives a different highlight color and shape."
+            onChange={(v) => set('envPreset', v)}
+          />
+        </Section>
+
+        <Section title="Background">
+          <SelectRow
+            label="bgMode" value={bg.mode} options={BG_MODES}
+            hint="Source for the canvas background. dom-snapshot grabs the host page region behind the blob (via html2canvas) so the glass refracts whatever DOM sits behind it."
+            onChange={setBgMode}
+          />
+          {bg.mode === 'color' && (
+            <ColorRow
+              label="bgColor" value={bg.color}
+              hint="Solid background color shown behind the blob."
+              onChange={(v) => set('background', { mode: 'color', color: v })}
+            />
+          )}
+          {bg.mode === 'gradient' && (
+            <>
+              <ColorRow
+                label="bgFrom" value={bg.from}
+                hint="Gradient start color."
+                onChange={(v) => set('background', { ...bg, from: v })}
+              />
+              <ColorRow
+                label="bgTo" value={bg.to}
+                hint="Gradient end color."
+                onChange={(v) => set('background', { ...bg, to: v })}
+              />
+            </>
+          )}
+          {bg.mode === 'image' && (
+            <TextRow
+              label="bgImageUrl" value={bg.url} placeholder="https://…"
+              hint="URL of an image to use as the background (CORS-enabled host required)."
+              onChange={(v) => {
+                setImageError(null);
+                set('background', { mode: 'image', url: v });
+              }}
+            />
+          )}
+        </Section>
+
+        <Section title="Camera">
+          <Slider
+            label="cameraFov" value={config.cameraFov} min={10} max={120} step={1}
+            hint="Field of view in degrees. Low = telephoto/flat, high = wide-angle/distorted."
+            onChange={(v) => set('cameraFov', v)}
+          />
+          <Slider
+            label="cameraZ" value={config.cameraZ} min={1} max={20} step={0.1}
+            hint="Camera distance from the blob. Larger = blob appears smaller."
+            onChange={(v) => set('cameraZ', v)}
+          />
+        </Section>
+      </div>
+    );
+  }
+
+  // EFFECTS tab
   return (
-    <div className="controls-leva">
-      {showImageError ? (
-        <div
-          role="alert"
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 2,
-            margin: '8px 10px',
-            padding: '8px 10px',
-            borderRadius: 6,
-            border: '1px solid rgba(248, 113, 113, 0.45)',
-            background: 'rgba(20, 14, 30, 0.96)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-            color: '#fecaca',
-            fontSize: 12,
-            lineHeight: 1.4,
-            fontFamily:
-              'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-          }}
-        >
-          {imageError}
-        </div>
-      ) : null}
-      <LevaPanel
-        store={levaStore}
-        fill
-        flat
-        titleBar={false}
-        hideCopyButton
-        theme={{
-          colors: {
-            elevation1: 'rgba(255,255,255,0.08)',
-            elevation2: 'transparent',
-            elevation3: 'rgba(255,255,255,0.10)',
-            accent1: '#f4f4f5',
-            accent2: '#f4f4f5',
-            accent3: '#ffffff',
-            highlight1: 'rgba(244, 241, 255, 0.78)',
-            highlight2: 'rgba(244, 241, 255, 0.95)',
-            highlight3: '#ffffff',
-            folderWidgetColor: 'rgba(244, 241, 255, 0.85)',
-            folderTextColor: '#ffffff',
-          },
-          fonts: {
-            mono: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
-          },
-          fontSizes: {
-            root: '13px',
-          },
-          space: {
-            sm: '14px',
-            md: '14px',
-            rowGap: '12px',
-          },
-          sizes: {
-            controlWidth: '200px',
-            numberInputMinWidth: '56px',
-          },
-        }}
-      />
+    <div className="controls">
+      <Section title="Motion">
+        <Slider
+          label="noiseAmplitude" value={config.noiseAmplitude} min={0} max={1} step={0.01}
+          hint="How far the surface deforms from its rest shape. Higher = more wobble."
+          onChange={(v) => set('noiseAmplitude', v)}
+        />
+        <Slider
+          label="noiseLowSpeed" value={config.noiseLowSpeed} min={0} max={0.5} step={0.01}
+          hint="Speed of slow, large-scale undulations. Sets the overall breathing pace."
+          onChange={(v) => set('noiseLowSpeed', v)}
+        />
+        <Slider
+          label="noiseHighSpeed" value={config.noiseHighSpeed} min={0} max={0.5} step={0.01}
+          hint="Speed of fast, fine-scale ripples layered on top of the slow motion."
+          onChange={(v) => set('noiseHighSpeed', v)}
+        />
+        <Slider
+          label="trailBiasWeight" value={config.trailBiasWeight} min={0} max={1} step={0.01}
+          hint="How strongly the deformation lags behind the cursor, leaving a trailing shape."
+          onChange={(v) => set('trailBiasWeight', v)}
+        />
+        <Slider
+          label="idleDriftAmplitude" value={config.idleDriftAmplitude} min={0} max={0.3} step={0.005}
+          hint="Subtle ambient motion when the cursor is still, so the blob never goes fully static."
+          onChange={(v) => set('idleDriftAmplitude', v)}
+        />
+      </Section>
+
+      <Section title="Cursor">
+        <Toggle
+          label="followEnabled" value={config.followEnabled}
+          hint="Master toggle for cursor-following behavior."
+          onChange={(v) => set('followEnabled', v)}
+        />
+        {config.followEnabled && (
+          <>
+            <Slider
+              label="targetLerp" value={config.targetLerp} min={0.001} max={0.2} step={0.001}
+              hint="How quickly the target position chases the cursor. Higher = snappier, lower = lazier."
+              onChange={(v) => set('targetLerp', v)}
+            />
+            <Slider
+              label="currentLerp" value={config.currentLerp} min={0.001} max={0.2} step={0.001}
+              hint="Smoothing on the actual position toward the target. Lower = more inertia."
+              onChange={(v) => set('currentLerp', v)}
+            />
+            <Slider
+              label="stretchK" value={config.stretchK} min={0} max={5} step={0.1}
+              hint="How much the blob stretches toward the cursor based on cursor velocity."
+              onChange={(v) => set('stretchK', v)}
+            />
+            <Slider
+              label="maxStretch" value={config.maxStretch} min={0} max={3} step={0.05}
+              hint="Upper limit on stretching, so fast cursor movement can't tear the shape apart."
+              onChange={(v) => set('maxStretch', v)}
+            />
+            <Slider
+              label="deadZone" value={config.deadZone} min={0} max={0.5} step={0.01}
+              hint="Cursor distance under which no follow happens, preventing jitter near rest."
+              onChange={(v) => set('deadZone', v)}
+            />
+          </>
+        )}
+      </Section>
+
+      <Section title="Click">
+        <Toggle
+          label="clickEnabled" value={config.clickEnabled}
+          hint="Master toggle for click-triggered effects."
+          onChange={(v) => set('clickEnabled', v)}
+        />
+        {config.clickEnabled && (
+          <>
+            <SelectRow
+              label="clickEffect" value={config.clickEffect} options={CLICK_EFFECTS}
+              hint="Which effect fires on click: ripple wave or outward burst."
+              onChange={(v) => set('clickEffect', v)}
+            />
+            {config.clickEffect === 'ripple' && (
+              <>
+                <Slider
+                  label="clickReactionDelay" value={config.clickReactionDelay} min={-0.3} max={0.5} step={0.01}
+                  hint="Time between click and visible reaction. Negative = quicker (wave starts closer to peak), positive = adds delay before the wave appears."
+                  onChange={(v) => set('clickReactionDelay', v)}
+                />
+                <Slider
+                  label="rippleOscFrequency" value={config.rippleOscFrequency} min={1} max={20} step={0.5}
+                  hint="How fast the wave oscillates. Higher = quicker buildup to peak, snappier reaction."
+                  onChange={(v) => set('rippleOscFrequency', v)}
+                />
+                <Slider
+                  label="ripplePropagationSpeed" value={config.ripplePropagationSpeed} min={0.05} max={1} step={0.01}
+                  hint="How fast the ripple wave travels across the surface."
+                  onChange={(v) => set('ripplePropagationSpeed', v)}
+                />
+                <Slider
+                  label="rippleAmplitude" value={config.rippleAmplitude} min={0} max={2} step={0.05}
+                  hint="Height of the ripple wave at impact."
+                  onChange={(v) => set('rippleAmplitude', v)}
+                />
+                <Slider
+                  label="rippleDecay" value={config.rippleDecay} min={0.1} max={5} step={0.05}
+                  hint="How quickly the ripple fades. Higher = shorter, snappier ripple."
+                  onChange={(v) => set('rippleDecay', v)}
+                />
+              </>
+            )}
+            {config.clickEffect === 'burst' && (
+              <Slider
+                label="burstScale" value={config.burstScale} min={0} max={1} step={0.01}
+                hint="Size of the outward push at the click point."
+                onChange={(v) => set('burstScale', v)}
+              />
+            )}
+          </>
+        )}
+      </Section>
     </div>
   );
 }

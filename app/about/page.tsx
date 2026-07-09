@@ -37,7 +37,7 @@ export default function AboutPage() {
         from the source repo.
       </p>
       <p>
-        <a href="/constructor">→ Open the constructor</a>
+        <a href="/">→ Open the constructor</a>
       </p>
     </main>
   );
