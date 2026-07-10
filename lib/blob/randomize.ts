@@ -62,7 +62,7 @@ export function randomizeConfig(current: BlobConfig): BlobConfig {
     clickEnabled: chance(0.8),
     clickEffect: pick(CLICK_EFFECTS),
     clickReactionDelay: round(rand(-0.15, 0.25), 0.01),
-    ripplePropagationSpeed: round(rand(0.08, 0.6), 0.01),
+    ripplePropagationSpeed: round(rand(1.5, 8), 0.1),
     rippleOscFrequency: round(rand(4, 16), 0.5),
     rippleDecay: round(rand(0.5, 3), 0.05),
     rippleSpatialFalloff: round(rand(0.25, 0.8), 0.01),

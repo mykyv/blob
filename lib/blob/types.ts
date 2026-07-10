@@ -118,7 +118,7 @@ export const defaultConfig: BlobConfig = {
   clickEnabled: true,
   clickEffect: 'ripple',
   clickReactionDelay: 0,
-  ripplePropagationSpeed: 0.18,
+  ripplePropagationSpeed: 4,
   rippleOscFrequency: 10.0,
   rippleDecay: 1.15,
   rippleSpatialFalloff: 0.45,

@@ -222,7 +222,7 @@ export function GlassBlob({ config }: Props) {
         cleanupAfter.push(imp);
         const dot = bx * imp.x + by * imp.y + bz * imp.z;
         const d = Math.acos(Math.max(-1, Math.min(1, dot)));
-        const localT = elapsed - d * (1 / cfg.ripplePropagationSpeed) * 0.18 - cfg.clickReactionDelay;
+        const localT = elapsed - d / cfg.ripplePropagationSpeed - cfg.clickReactionDelay;
         if (localT < 0) continue;
         const env = Math.exp(-localT * cfg.rippleDecay);
         const osc = Math.sin(localT * cfg.rippleOscFrequency);

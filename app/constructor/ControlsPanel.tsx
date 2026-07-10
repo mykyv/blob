@@ -266,12 +266,12 @@ export function ControlsPanel({ activeTab }: { activeTab: ControlsTab }) {
                 />
                 <Slider
                   label="rippleOscFrequency" value={config.rippleOscFrequency} min={1} max={20} step={0.5}
-                  hint="How fast the wave oscillates. Higher = quicker buildup to peak, snappier reaction."
+                  hint="Primary speed control: how fast the surface wobbles. Higher = quicker buildup to peak, snappier reaction."
                   onChange={(v) => set('rippleOscFrequency', v)}
                 />
                 <Slider
-                  label="ripplePropagationSpeed" value={config.ripplePropagationSpeed} min={0.05} max={1} step={0.01}
-                  hint="How fast the ripple wave travels across the surface."
+                  label="ripplePropagationSpeed" value={config.ripplePropagationSpeed} min={1} max={12} step={0.1}
+                  hint="How fast the wave travels across the surface. Higher = faster, near-instant; lower = slow visible sweep from the click point."
                   onChange={(v) => set('ripplePropagationSpeed', v)}
                 />
                 <Slider
